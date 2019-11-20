@@ -77,6 +77,9 @@ public class WeNetwork {
         return Control.getInstance().getApiService(clz);
     }
 
+    /**
+     * 这里用来手动销毁资源
+     */
     public static void destroy(){
 
     }
