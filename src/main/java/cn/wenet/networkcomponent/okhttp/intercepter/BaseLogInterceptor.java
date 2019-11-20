@@ -4,6 +4,7 @@ package cn.wenet.networkcomponent.okhttp.intercepter;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -68,6 +69,11 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
                 source.request(Long.MAX_VALUE);
                 Buffer buffer = source.buffer();
                 MediaType contentType = responseBody.contentType();
+                boolean plaintext = isPlaintext(buffer);
+                if(!plaintext){
+                    WeDebug.e("请求结果不是文本，其类型是："+contentType);
+                    return response;
+                }
                 Charset charset = UTF8;
                 if (null != contentType) {
                     charset = contentType.charset(UTF8);
@@ -81,6 +87,27 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
             return response;
         } else {
             return chain.proceed(request);
+        }
+    }
+
+    static boolean isPlaintext(Buffer buffer) {
+        try {
+            Buffer prefix = new Buffer();
+            long byteCount = buffer.size() < 64 ? buffer.size() : 64;
+            buffer.copyTo(prefix, 0, byteCount);
+            for (int i = 0; i < 16; i++) {
+                if (prefix.exhausted()) {
+                    break;
+                }
+                int codePoint = prefix.readUtf8CodePoint();
+                if (Character.isISOControl(codePoint) && !Character.isWhitespace(codePoint)) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (EOFException e) {
+            // Truncated UTF-8 sequence.
+            return false;
         }
     }
 

@@ -19,7 +19,7 @@ public class WeDebug {
 
   public static void e(String message){
       if(DEBUG) {
-          Log.e(TAG, "WeDebug: " + message + "\n");
+          Log.e(TAG, "WeNet: " + message + "\n");
       }
   }
 
