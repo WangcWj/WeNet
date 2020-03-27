@@ -1,20 +1,24 @@
-package cn.wenet.networkcomponent.control;
+package cn.wenet.networkcomponent.core;
+
+import android.content.Context;
 
 import java.util.Map;
 
-import cn.wenet.networkcomponent.base.NetLifecycleControl;
+import cn.wenet.networkcomponent.base.BaseControl;
+import cn.wenet.networkcomponent.base.ComponentLifeCircle;
+import cn.wenet.networkcomponent.base.NetBaseObserver;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import cn.wenet.networkcomponent.request.NetRequest;
+import io.reactivex.Observable;
 import okhttp3.HttpUrl;
 
 /**
  * 整个网络请求的总线 单例模式
  *
- *
  * @author WANG
  */
 
-public class Control extends BaseControl {
+public class Control extends BaseControl implements ComponentLifeCircle {
 
     private Control() {
 
@@ -22,7 +26,7 @@ public class Control extends BaseControl {
 
     private static Control instance = null;
 
-    public static Control getInstance() {
+    static Control getInstance() {
         if (null == instance) {
             synchronized (Control.class) {
                 if (null == instance) {
@@ -39,6 +43,7 @@ public class Control extends BaseControl {
 
     public final static String DEFAULT_BASE_URL_FLAG = GLOBAL_HEADER + BASE_URL_HEADER;
 
+    private WeNetLifeCircleManager mLifeManager;
 
     public void addBaseInterceptor(BaseInterceptor baseInterceptor) {
         mNetOkHttp.addBaseInterceptor(baseInterceptor);
@@ -68,24 +73,43 @@ public class Control extends BaseControl {
         return mHaveInit;
     }
 
-    /**
-     * 开始网络请求
-     *
-     * @param tag
-     * @return
-     */
-    public NetRequest request(NetLifecycleControl tag) {
-        return new NetRequest(Control.getInstance(), tag);
+    public WeNetLifeCircleManager getLifeManager(Context context) {
+        return null;
     }
 
     /**
      * 开始网络请求
      *
-     * @param tag
      * @return
      */
-    public NetRequest requestJson(NetLifecycleControl tag) {
-        return new NetRequest(Control.getInstance(), tag);
+    public NetRequest request() {
+        return new NetRequest(Control.getInstance());
     }
 
+    /**
+     * 开始网络请求
+     *
+     * @return
+     */
+    public NetRequest requestJson() {
+        return new NetRequest(Control.getInstance());
+    }
+
+    public void preExecute(WeNetworkCallBack callback, Observable observable) {
+        WeNetLifeCircleManager lifeManager = getLifeManager(callback.getContext());
+        NetBaseObserver baseObserver = getBaseObserve(callback);
+        baseObserver.setLifeCircleManager(lifeManager);
+        subscribe(observable, baseObserver);
+    }
+
+    @Override
+    public void onCreate() {
+
+    }
+
+    @Override
+    public void onDestroy() {
+      instance = null;
+
+    }
 }

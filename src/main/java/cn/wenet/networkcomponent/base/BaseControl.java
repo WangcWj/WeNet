@@ -1,20 +1,20 @@
-package cn.wenet.networkcomponent.control;
+package cn.wenet.networkcomponent.base;
 
 
 import android.content.Context;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import cn.wenet.networkcomponent.base.NetBaseObserver;
-import cn.wenet.networkcomponent.base.NetBaseParam;
-import cn.wenet.networkcomponent.base.NetLifecycleControl;
+import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.debug.WeDebug;
+import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
+import cn.wenet.networkcomponent.okhttp.intercepter.BaseParamsInterceptor;
 import cn.wenet.networkcomponent.okhttp.intercepter.NetInterceptorFactory;
 import cn.wenet.networkcomponent.okhttp.NetOkHttp;
-import cn.wenet.networkcomponent.request.WeNetworkCallBack;
+import cn.wenet.networkcomponent.core.WeNetworkCallBack;
+import cn.wenet.networkcomponent.request.NetRequest;
 import cn.wenet.networkcomponent.retrofit.NetRetrofit;
 import cn.wenet.networkcomponent.rxjava.NetRetryWhen;
 import io.reactivex.Observable;
@@ -31,7 +31,7 @@ import retrofit2.Retrofit;
  */
 public class BaseControl {
 
-    private Context mContext;
+    private Context mApplicationContext;
 
     private NetBaseObserver mNetBaseObserver;
 
@@ -43,24 +43,19 @@ public class BaseControl {
 
     protected NetRetrofit mNetRetrofit;
 
-    protected Map<String, Object> mParams = new Hashtable<>();
-
-    protected Map<String, Object> mBaseParams = new HashMap<>();
+    public Map<String, Object> mBaseParams = new HashMap<>();
 
     protected Map<String, HttpUrl> mBaseUrls = new HashMap<>();
+    private BaseParamsInterceptor paramsInterceptor;
 
     protected Context getContext() {
-        return mContext;
+        return mApplicationContext;
     }
 
-    public Map<String, Object> getParams() {
-        return mParams;
-    }
-
-    public Map<String, Object> clearParams() {
-        mParams.clear();
-        mParams.putAll(mBaseParams);
-        return mParams;
+    public void addRequestParams(String url, NetRequest request) {
+        if (null != paramsInterceptor) {
+            paramsInterceptor.addRequest(url, request);
+        }
     }
 
     /**
@@ -94,12 +89,11 @@ public class BaseControl {
      * @param netCallBack
      * @return
      */
-    public NetBaseObserver getBaseObserve(WeNetworkCallBack netCallBack, NetLifecycleControl tag) {
+    public NetBaseObserver getBaseObserve(WeNetworkCallBack netCallBack) {
         if (null == mNetBaseObserver) {
             mNetBaseObserver = new NetBaseObserver();
         }
         mNetBaseObserver.setNetCallBack(netCallBack);
-        mNetBaseObserver.setTag(tag);
         return mNetBaseObserver;
     }
 
@@ -141,13 +135,18 @@ public class BaseControl {
     }
 
     public void init(Context context) {
-        mContext = context;
+        mApplicationContext = context;
         mNetOkHttp = NetOkHttp.getInstance();
         mNetRetrofit = NetRetrofit.getInstance();
         mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.logInterceptor());
         mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.baseUrlInterceptor());
-        mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.baseParamsIntercepter());
+        paramsInterceptor = (BaseParamsInterceptor) NetInterceptorFactory.baseParamsIntercepter();
+        mNetOkHttp.addBaseInterceptor(paramsInterceptor);
         mHaveInit = true;
+    }
+
+    public BaseInterceptor getParamsInterceptor() {
+        return paramsInterceptor;
     }
 
     protected void transformationUrl(String flag, String url) {

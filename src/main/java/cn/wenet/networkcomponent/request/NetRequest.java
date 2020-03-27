@@ -1,11 +1,12 @@
 package cn.wenet.networkcomponent.request;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
-import cn.wenet.networkcomponent.control.Control;
-import cn.wenet.networkcomponent.base.NetBaseObserver;
-import cn.wenet.networkcomponent.base.NetLifecycleControl;
+import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.core.WeNetworkCallBack;
+import cn.wenet.networkcomponent.retrofit.calladapter.BodyObservable;
 import io.reactivex.Observable;
 
 /**
@@ -21,28 +22,31 @@ public class NetRequest {
 
     private Control netControl;
 
-    private NetLifecycleControl mDestroyDisposable;
+    private BodyObservable mNetObservable;
 
     private Observable mObservable;
 
-    public NetRequest(Control netControl, NetLifecycleControl mDestroyDisposable) {
+
+    protected Map<String, Object> mParams;
+
+    public NetRequest(Control netControl) {
         this.netControl = netControl;
-        this.mDestroyDisposable = mDestroyDisposable;
-        netControl.clearParams();
+        mParams = new HashMap<>();
+        mParams.putAll(netControl.mBaseParams);
     }
 
     public NetRequest addParams(String key, String value) {
-        netControl.getParams().put(key, value);
+        mParams.put(key, value);
         return this;
     }
 
     public NetRequest addParams(Map params) {
-        netControl.getParams().putAll(params);
+        mParams.putAll(params);
         return this;
     }
 
-    public Observable getObservable() {
-        return mObservable;
+    public Map<String, Object> getParams() {
+        return mParams;
     }
 
     public <T> NetRequest apiMethod(Observable<T> observable) {
@@ -50,21 +54,23 @@ public class NetRequest {
         return this;
     }
 
+    public void setNetObservable(BodyObservable mNetObservable) {
+        this.mNetObservable = mNetObservable;
+    }
+
     public <T> void execute(WeNetworkCallBack<T> callback) {
-        if (null == mObservable) {
-            return;
+        if (null != mNetObservable) {
+            //要先执行
+            execute(mNetObservable, callback);
+        } else if (null != mObservable) {
+            execute(mObservable, callback);
         }
+    }
+
+    public <T> void execute(Observable observable, WeNetworkCallBack<T> callback) {
         //要先执行
-        baseExecute(callback, mObservable);
+        netControl.preExecute(callback, observable);
     }
 
-    private void baseExecute(WeNetworkCallBack callback, Observable observable) {
-        NetBaseObserver baseObserver = netControl.getBaseObserve(callback, mDestroyDisposable);
-        subscribe(observable, baseObserver);
-    }
-
-    private void subscribe(Observable observable, NetBaseObserver callback) {
-        netControl.subscribe(observable, callback);
-    }
 
 }

@@ -1,13 +1,13 @@
 package cn.wenet.networkcomponent.base;
 
 
+import cn.wenet.networkcomponent.core.WeNetLifeCircleManager;
 import cn.wenet.networkcomponent.exception.NetException;
-import cn.wenet.networkcomponent.request.WeNetworkCallBack;
+import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
 /**
- *
  * @author WANG
  * @date 17/11/23
  * 这边处理结果有两种:
@@ -19,15 +19,14 @@ public class NetBaseObserver<T> implements Observer<T> {
 
 
     private WeNetworkCallBack netCallBack;
-
-    private NetLifecycleControl mTag;
+    private WeNetLifeCircleManager lifeCircleManager;
 
     public void setNetCallBack(WeNetworkCallBack netCallBack) {
         this.netCallBack = netCallBack;
     }
 
-    public void setTag(NetLifecycleControl mTag) {
-        this.mTag = mTag;
+    public void setLifeCircleManager(WeNetLifeCircleManager lifeCircleManager) {
+        this.lifeCircleManager = lifeCircleManager;
     }
 
     @Override
@@ -43,8 +42,8 @@ public class NetBaseObserver<T> implements Observer<T> {
 
     @Override
     public void onSubscribe(Disposable d) {
-        if (null != mTag) {
-            mTag.addDisposable(d);
+        if (null != lifeCircleManager) {
+            lifeCircleManager.addDisposable(d);
         }
     }
 

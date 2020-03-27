@@ -1,14 +1,19 @@
-package cn.wenet.networkcomponent;
+package cn.wenet.networkcomponent.core;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import cn.wenet.networkcomponent.base.NetBaseParam;
 import cn.wenet.networkcomponent.base.NetLifecycleControl;
-import cn.wenet.networkcomponent.control.Control;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import cn.wenet.networkcomponent.request.NetRequest;
+import okhttp3.HttpUrl;
 
 /**
  * @author WANG
@@ -31,6 +36,12 @@ public class WeNetwork {
             instance.init(context);
         }
         return new WeNetwork();
+    }
+
+    private final Set<NetRequest> requests = Collections.newSetFromMap(new WeakHashMap<NetRequest, Boolean>());
+
+    public static Map<String, HttpUrl> getBaseUrls() {
+        return Control.getInstance().getBaseUrls();
     }
 
     public WeNetwork addBaseInterceptor(@NonNull BaseInterceptor interceptor) {
@@ -56,14 +67,26 @@ public class WeNetwork {
         return this;
     }
 
+    public static <T> T apiMethod(Class<T> clz) {
+        return Control.getInstance().getApiService(clz);
+    }
+
     /**
      * 开始网络请求，每个网络请求都是从这里开始的。
      *
-     * @param tag
      * @return
      */
-    public static NetRequest request(NetLifecycleControl tag) {
-        return Control.getInstance().request(tag);
+    public static NetRequest request() {
+        return Control.getInstance().request();
+    }
+
+    /**
+     * 开始网络请求，每个网络请求都是从这里开始的。
+     *
+     * @return
+     */
+    public static NetRequest requestJson() {
+        return Control.getInstance().requestJson();
     }
 
     /**

@@ -2,11 +2,13 @@ package cn.wenet.networkcomponent.okhttp.intercepter;
 
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import cn.wenet.networkcomponent.control.Control;
+import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.request.NetRequest;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -26,11 +28,25 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
     private final String POST = "POST";
     private final String GET = "GET";
 
+    private Map<String, NetRequest> mPatams;
+
+    public void addRequest(String url, NetRequest request) {
+        if (null == mPatams) {
+            mPatams = new HashMap<>();
+        }
+        mPatams.put(url, request);
+    }
+
+
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request oriRequest = chain.request();
-        Map<String, Object> params = Control.getInstance().getParams();
-        if (params.size() <= 0) {
+        if (null == mPatams || mPatams.size() <= 0) {
+            return chain.proceed(oriRequest);
+        }
+        String url = oriRequest.url().toString();
+        NetRequest request = mPatams.get(url);
+        if (null == request || null == request.getParams()) {
             return chain.proceed(oriRequest);
         }
         if (POST.equals(oriRequest.method()) && null != oriRequest.body()) {
@@ -38,10 +54,10 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
             RequestBody newBody = null;
             if (body instanceof FormBody) {
                 //表单请求 也就是一般的POST请求.
-                newBody = addParamsToFormBody(params, (FormBody) body);
+                newBody = addParamsToFormBody(request.getParams(), (FormBody) body);
             } else if (oriRequest.body() instanceof MultipartBody) {
                 //文件请求
-                newBody = addParamsToMultipartBody(params, (MultipartBody) body);
+                newBody = addParamsToMultipartBody(request.getParams(), (MultipartBody) body);
             }
             if (null == newBody) {
                 return chain.proceed(oriRequest);
@@ -55,7 +71,7 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
         } else if (GET.equals(oriRequest.method())) {
             //GET请求拼接参数给HttpUrl.
             HttpUrl httpUrl = oriRequest.url();
-            HttpUrl newHttpUrl = addParamsToHttpUrl(params, httpUrl);
+            HttpUrl newHttpUrl = addParamsToHttpUrl(request.getParams(), httpUrl);
             //重新组装
             Request.Builder requestBuilder = oriRequest.newBuilder();
             requestBuilder.url(newHttpUrl);
@@ -90,6 +106,7 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
 
     private FormBody addParamsToFormBody(Map<String, Object> params, FormBody body) {
         FormBody.Builder builder = new FormBody.Builder();
+
         //添加新的参数
         if (params.size() > 0) {
             Iterator iterator = params.entrySet().iterator();

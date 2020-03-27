@@ -36,15 +36,12 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
             HttpUrl httpUrl = request.url();
 
             List<String> strings = httpUrl.encodedPathSegments();
-            if(null != strings && strings.size() > 0) {
+            if (strings.size() > 0) {
                 Log.e("WANG", "BaseLogInterceptor.intercept" + strings);
             }
-
-            if (null != httpUrl && null != httpUrl.toString()) {
-                String url = httpUrl.toString();
-                if (!TextUtils.isEmpty(url)) {
-                    WeDebug.e("URL is : " + url);
-                }
+            String url = httpUrl.toString();
+            if (!TextUtils.isEmpty(url)) {
+                WeDebug.e("URL is : " + url);
             }
             String method = request.method();
             if (!TextUtils.isEmpty(method)) {
@@ -55,7 +52,7 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
                 String bodyStr = body.toString();
                 WeDebug.e("RequestBody is :" + bodyStr);
             }
-            if(WeDebug.LOG_REQUEST_HEADER) {
+            if (WeDebug.LOG_REQUEST_HEADER) {
                 Headers headers = request.headers();
                 if (null != headers) {
                     String headerStr = headers.toString();
@@ -70,8 +67,8 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
                 Buffer buffer = source.buffer();
                 MediaType contentType = responseBody.contentType();
                 boolean plaintext = isPlaintext(buffer);
-                if(!plaintext){
-                    WeDebug.e("请求结果不是文本，其类型是："+contentType);
+                if (!plaintext) {
+                    WeDebug.e("请求结果不是文本，其类型是：" + contentType);
                     return response;
                 }
                 Charset charset = UTF8;
@@ -90,7 +87,7 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
         }
     }
 
-    static boolean isPlaintext(Buffer buffer) {
+    private static boolean isPlaintext(Buffer buffer) {
         try {
             Buffer prefix = new Buffer();
             long byteCount = buffer.size() < 64 ? buffer.size() : 64;

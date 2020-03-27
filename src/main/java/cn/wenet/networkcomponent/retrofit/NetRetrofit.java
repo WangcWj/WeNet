@@ -2,7 +2,8 @@ package cn.wenet.networkcomponent.retrofit;
 
 import android.util.Log;
 
-import cn.wenet.networkcomponent.convert.ToStringConverterFactory;
+import cn.wenet.networkcomponent.retrofit.convert.ToStringConverterFactory;
+import cn.wenet.networkcomponent.retrofit.calladapter.WeNetCallAdapterFactory;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -53,7 +54,8 @@ public class NetRetrofit {
         builder = new Retrofit.Builder()
                 .addConverterFactory(ToStringConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(WeNetCallAdapterFactory.create());
     }
 
     public void transform(OkHttpClient okHttpClient) {

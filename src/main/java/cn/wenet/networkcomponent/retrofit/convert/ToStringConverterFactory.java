@@ -1,4 +1,4 @@
-package cn.wenet.networkcomponent.convert;
+package cn.wenet.networkcomponent.retrofit.convert;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
