@@ -7,7 +7,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import cn.wenet.networkcomponent.base.NetBaseResultBean;
-import cn.wenet.networkcomponent.core.WeNetObservable;
+import cn.wenet.networkcomponent.core.WeNetResult;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import retrofit2.CallAdapter;
@@ -62,7 +62,7 @@ public class WeNetCallAdapterFactory extends CallAdapter.Factory {
     @Override
     public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
         Class<?> rawType = getRawType(returnType);
-        if (rawType != WeNetObservable.class) {
+        if (rawType != WeNetResult.class) {
             return null;
         }
         if (!(returnType instanceof ParameterizedType)) {
@@ -78,6 +78,6 @@ public class WeNetCallAdapterFactory extends CallAdapter.Factory {
             //do something
 
         }
-        return new RxJava2CallAdapter(observableType, scheduler, isAsync);
+        return new WeNet2CallAdapter(observableType, scheduler, isAsync);
     }
 }

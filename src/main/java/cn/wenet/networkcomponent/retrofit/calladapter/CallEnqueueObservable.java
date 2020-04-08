@@ -16,7 +16,7 @@ import retrofit2.Response;
  * @author cc.wang
  * @date 2020/3/27
  */
-public class CallEnqueueObservable<T> extends Observable<Response<T>> {
+class CallEnqueueObservable<T> extends Observable<Response<T>> {
     private final Call<T> originalCall;
 
     CallEnqueueObservable(Call<T> originalCall) {

@@ -10,6 +10,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import cn.wenet.networkcomponent.debug.WeDebug;
+import cn.wenet.networkcomponent.utils.RequestBodyUtils;
+import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -35,28 +37,30 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
         if (WeDebug.DEBUG) {
             HttpUrl httpUrl = request.url();
 
-            List<String> strings = httpUrl.encodedPathSegments();
-            if (strings.size() > 0) {
-                Log.e("WANG", "BaseLogInterceptor.intercept" + strings);
+            List<String> methods = httpUrl.encodedPathSegments();
+            if (methods.size() > 0) {
+                WeDebug.e("method name  is", methods.get(0));
             }
             String url = httpUrl.toString();
             if (!TextUtils.isEmpty(url)) {
-                WeDebug.e("URL is : " + url);
+                WeDebug.e("URL is : ", url);
             }
             String method = request.method();
             if (!TextUtils.isEmpty(method)) {
-                WeDebug.e("Method is : " + method);
+                WeDebug.e("Method is : ", method);
             }
             RequestBody body = request.body();
-            if (null != body) {
-                String bodyStr = body.toString();
-                WeDebug.e("RequestBody is :" + bodyStr);
+            if (body != null) {
+                String readString = RequestBodyUtils.requestBodyToString(body);
+                if(!TextUtils.isEmpty(readString)) {
+                    WeDebug.e("RequestBody is : " + readString);
+                }
             }
             if (WeDebug.LOG_REQUEST_HEADER) {
                 Headers headers = request.headers();
                 if (null != headers) {
                     String headerStr = headers.toString();
-                    WeDebug.e("Headers is :" + headerStr);
+                    WeDebug.e("Headers is :", headerStr);
                 }
             }
             Response response = chain.proceed(request);
@@ -66,9 +70,9 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
                 source.request(Long.MAX_VALUE);
                 Buffer buffer = source.buffer();
                 MediaType contentType = responseBody.contentType();
-                boolean plaintext = isPlaintext(buffer);
+                boolean plaintext = RequestBodyUtils.isPlaintext(buffer);
                 if (!plaintext) {
-                    WeDebug.e("请求结果不是文本，其类型是：" + contentType);
+                    WeDebug.e("请求结果不是文本，其类型是：", contentType.toString());
                     return response;
                 }
                 Charset charset = UTF8;
@@ -78,7 +82,7 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
                 long contentLength = responseBody.contentLength();
                 if (0 != contentLength) {
                     String json = buffer.clone().readString(charset);
-                    WeDebug.e("Json :" + json);
+                    WeDebug.e("Json : \n", json);
                 }
             }
             return response;
@@ -87,26 +91,6 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
         }
     }
 
-    private static boolean isPlaintext(Buffer buffer) {
-        try {
-            Buffer prefix = new Buffer();
-            long byteCount = buffer.size() < 64 ? buffer.size() : 64;
-            buffer.copyTo(prefix, 0, byteCount);
-            for (int i = 0; i < 16; i++) {
-                if (prefix.exhausted()) {
-                    break;
-                }
-                int codePoint = prefix.readUtf8CodePoint();
-                if (Character.isISOControl(codePoint) && !Character.isWhitespace(codePoint)) {
-                    return false;
-                }
-            }
-            return true;
-        } catch (EOFException e) {
-            // Truncated UTF-8 sequence.
-            return false;
-        }
-    }
 
     @Override
     public boolean isNetInterceptor() {

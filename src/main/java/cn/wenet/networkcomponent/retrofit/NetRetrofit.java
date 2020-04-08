@@ -2,6 +2,7 @@ package cn.wenet.networkcomponent.retrofit;
 
 import android.util.Log;
 
+import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.retrofit.convert.ToStringConverterFactory;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetCallAdapterFactory;
 import okhttp3.OkHttpClient;
@@ -43,7 +44,7 @@ public class NetRetrofit {
     public Retrofit getRetrofit() {
         emptyBuild();
         if (null == mRetrofit || haveChange) {
-            Log.e("WANG", "NetRetrofit.getRetrofit.重新创建了一次");
+            WeDebug.e("NetRetrofit.getRetrofit.重新创建了一次");
             mRetrofit = builder.build();
         }
         haveChange = false;

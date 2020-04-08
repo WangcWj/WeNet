@@ -1,7 +1,7 @@
 package cn.wenet.networkcomponent.base;
 
 
-import cn.wenet.networkcomponent.core.WeNetLifeCircleManager;
+import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.exception.NetException;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import io.reactivex.Observer;
@@ -19,18 +19,22 @@ public class NetBaseObserver<T> implements Observer<T> {
 
 
     private WeNetworkCallBack netCallBack;
-    private WeNetLifeCircleManager lifeCircleManager;
+    private PageLifeManager lifeCircleManager;
+    private Disposable mCurrentDisposable;
 
     public void setNetCallBack(WeNetworkCallBack netCallBack) {
         this.netCallBack = netCallBack;
     }
 
-    public void setLifeCircleManager(WeNetLifeCircleManager lifeCircleManager) {
+    public void setLifeCircleManager(PageLifeManager lifeCircleManager) {
         this.lifeCircleManager = lifeCircleManager;
     }
 
     @Override
     public void onError(Throwable e) {
+        if (null != lifeCircleManager) {
+            lifeCircleManager.requestEnd(mCurrentDisposable);
+        }
         NetException netException = new NetException(e);
         netCallBack.onError(netException);
     }
@@ -42,8 +46,9 @@ public class NetBaseObserver<T> implements Observer<T> {
 
     @Override
     public void onSubscribe(Disposable d) {
+        mCurrentDisposable = d;
         if (null != lifeCircleManager) {
-            lifeCircleManager.addDisposable(d);
+            lifeCircleManager.requestStart(d);
         }
     }
 
@@ -52,24 +57,39 @@ public class NetBaseObserver<T> implements Observer<T> {
         if (null == netCallBack) {
             return;
         }
-        if (t instanceof NetBaseResultBean) {
-            NetBaseResultBean resultBean = (NetBaseResultBean) t;
-            NetException netException = new NetException(resultBean.getCode(), resultBean.getStatus(), resultBean.getMsg());
-            boolean success = netException.success();
-            if (success) {
-                Object data = resultBean.getData();
-                if (null == data) {
-                    netException.setMessage("Data数据为null!");
-                    netCallBack.onError(netException);
+        try {
+            if (t instanceof NetBaseResultBean) {
+                NetBaseResultBean resultBean = (NetBaseResultBean) t;
+                NetException netException = new NetException(resultBean.getCode(), resultBean.getStatus(), resultBean.getMsg());
+                boolean success = netException.success();
+                if (success) {
+                    Object data = resultBean.getData();
+                    if (null == data) {
+                        netException.setMessage("Data数据为null!");
+                        netCallBack.onError(netException);
+                    } else {
+                        netCallBack.onSuccess(data);
+                    }
                 } else {
-                    netCallBack.onSuccess(data);
+                    netCallBack.onError(netException);
                 }
             } else {
-                netCallBack.onError(netException);
+                netCallBack.onSuccess(t);
             }
-        } else {
-            netCallBack.onSuccess(t);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (null != lifeCircleManager) {
+                lifeCircleManager.requestEnd(mCurrentDisposable);
+            }
+            clearData();
         }
+    }
+
+    private void clearData() {
+        netCallBack = null;
+        lifeCircleManager = null;
+        mCurrentDisposable = null;
     }
 
 

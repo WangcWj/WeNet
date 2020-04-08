@@ -1,5 +1,7 @@
 package cn.wenet.networkcomponent.okhttp;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -8,9 +10,12 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
 import cn.wenet.networkcomponent.base.NetBaseParam;
+import cn.wenet.networkcomponent.debug.WeDebug;
+import cn.wenet.networkcomponent.okhttp.https.SSLSocketClient;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * 只管理跟OkHttp有关的业务,动态添加拦截器的功能去掉了.
@@ -43,6 +48,7 @@ public class NetOkHttp {
     public OkHttpClient getOkHttpClient() {
         emptyBuild();
         if (null == mOkHttpClient || haveChange) {
+            WeDebug.e("NetOkHttp重新创建");
             mOkHttpClient = builder.build();
         }
         haveChange = false;

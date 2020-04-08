@@ -1,4 +1,4 @@
-package cn.wenet.networkcomponent.base;
+package cn.wenet.networkcomponent.life;
 
 /**
  * Created to :

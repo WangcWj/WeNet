@@ -10,17 +10,17 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import cn.wenet.networkcomponent.base.NetBaseParam;
-import cn.wenet.networkcomponent.base.NetLifecycleControl;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import cn.wenet.networkcomponent.request.NetRequest;
+import io.reactivex.Observable;
 import okhttp3.HttpUrl;
 
 /**
  * @author WANG
  */
-public class WeNetwork {
+public class WeNetWork {
 
-    private WeNetwork() {
+    private WeNetWork() {
 
     }
 
@@ -30,26 +30,24 @@ public class WeNetwork {
      * @param context
      * @return
      */
-    public static WeNetwork init(Context context) {
+    public static WeNetWork init(Context context) {
         Control instance = Control.getInstance();
         if (!instance.isHaveInit()) {
             instance.init(context);
         }
-        return new WeNetwork();
+        return new WeNetWork();
     }
-
-    private final Set<NetRequest> requests = Collections.newSetFromMap(new WeakHashMap<NetRequest, Boolean>());
 
     public static Map<String, HttpUrl> getBaseUrls() {
         return Control.getInstance().getBaseUrls();
     }
 
-    public WeNetwork addBaseInterceptor(@NonNull BaseInterceptor interceptor) {
+    public WeNetWork addBaseInterceptor(@NonNull BaseInterceptor interceptor) {
         Control.getInstance().addBaseInterceptor(interceptor);
         return this;
     }
 
-    public WeNetwork successCode(int code) {
+    public WeNetWork successCode(int code) {
         NetBaseParam.SUCCESS_CODE = code;
         return this;
     }
@@ -62,13 +60,35 @@ public class WeNetwork {
      * @param url  新域名的Url。
      * @return
      */
-    public WeNetwork addBaseUrl(String flag,String url) {
+    public WeNetWork addBaseUrl(String flag, String url) {
         Control.getInstance().addBaseUrl(flag,url);
         return this;
     }
 
     public static <T> T apiMethod(Class<T> clz) {
         return Control.getInstance().getApiService(clz);
+    }
+
+    /**
+     * 开始网络请求，每个网络请求都是从这里开始的。
+     *
+     * @return
+     */
+    public static <T>NetRequest request(WeNetResult<T> observable) {
+        return Control.getInstance().request(observable);
+    }
+
+    /**
+     * 开始网络请求，每个网络请求都是从这里开始的。
+     *
+     * @return
+     */
+    public static <T>NetRequest request(Observable<T> observable) {
+        return Control.getInstance().request(observable);
+    }
+
+    public static Map<String,Object> getBaseParams(){
+        return Control.getInstance().getBaseParams();
     }
 
     /**

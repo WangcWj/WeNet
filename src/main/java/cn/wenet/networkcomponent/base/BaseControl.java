@@ -11,6 +11,7 @@ import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseParamsInterceptor;
+import cn.wenet.networkcomponent.okhttp.intercepter.BaseUrlInterceptor;
 import cn.wenet.networkcomponent.okhttp.intercepter.NetInterceptorFactory;
 import cn.wenet.networkcomponent.okhttp.NetOkHttp;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
@@ -50,6 +51,10 @@ public class BaseControl {
 
     protected Context getContext() {
         return mApplicationContext;
+    }
+
+    public Map<String, Object> getBaseParams() {
+        return mBaseParams;
     }
 
     public void addRequestParams(String url, NetRequest request) {
@@ -138,9 +143,11 @@ public class BaseControl {
         mApplicationContext = context;
         mNetOkHttp = NetOkHttp.getInstance();
         mNetRetrofit = NetRetrofit.getInstance();
-        mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.logInterceptor());
-        mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.baseUrlInterceptor());
         paramsInterceptor = (BaseParamsInterceptor) NetInterceptorFactory.baseParamsIntercepter();
+        BaseInterceptor interceptor = NetInterceptorFactory.baseUrlInterceptor();
+        ((BaseUrlInterceptor) interceptor).setParamsInterceptor(paramsInterceptor);
+        mNetOkHttp.addBaseInterceptor(interceptor);
+        mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.logInterceptor());
         mNetOkHttp.addBaseInterceptor(paramsInterceptor);
         mHaveInit = true;
     }

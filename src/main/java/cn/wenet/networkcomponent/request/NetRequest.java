@@ -6,7 +6,7 @@ import java.util.Map;
 
 import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
-import cn.wenet.networkcomponent.retrofit.calladapter.BodyObservable;
+import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;
 import io.reactivex.Observable;
 
 /**
@@ -22,17 +22,52 @@ public class NetRequest {
 
     private Control netControl;
 
-    private BodyObservable mNetObservable;
+    private WeNetResultObservable mNetObservable;
 
     private Observable mObservable;
 
+    private Map<String, Object> mParams;
 
-    protected Map<String, Object> mParams;
+    private String mUrl;
+
+    private boolean isBody = false;
+
+    private boolean isForm = true;
+
 
     public NetRequest(Control netControl) {
         this.netControl = netControl;
         mParams = new HashMap<>();
         mParams.putAll(netControl.mBaseParams);
+    }
+
+    public Map<String, Object> getParams() {
+        return mParams;
+    }
+
+    public String getUrl() {
+        return mUrl;
+    }
+
+    public Observable getObservable() {
+        if (null != mNetObservable) {
+            //要先执行NetObservable。
+            return mNetObservable;
+        } else if (null != mObservable) {
+            //再执行Observable。
+            return mObservable;
+        }
+        return null;
+    }
+
+    public NetRequest asBody() {
+        this.isBody = true;
+        return this;
+    }
+
+    public NetRequest asFrom() {
+        this.isForm = true;
+        return this;
     }
 
     public NetRequest addParams(String key, String value) {
@@ -45,8 +80,16 @@ public class NetRequest {
         return this;
     }
 
-    public Map<String, Object> getParams() {
-        return mParams;
+    public boolean isBody() {
+        return isBody;
+    }
+
+    public boolean isForm() {
+        return isForm;
+    }
+
+    public void setNetObservable(WeNetResultObservable netObservable) {
+        mNetObservable = netObservable;
     }
 
     public <T> NetRequest apiMethod(Observable<T> observable) {
@@ -54,23 +97,23 @@ public class NetRequest {
         return this;
     }
 
-    public void setNetObservable(BodyObservable mNetObservable) {
-        this.mNetObservable = mNetObservable;
-    }
-
     public <T> void execute(WeNetworkCallBack<T> callback) {
         if (null != mNetObservable) {
-            //要先执行
+            //要先执行NetObservable。
             execute(mNetObservable, callback);
         } else if (null != mObservable) {
+            //再执行Observable。
             execute(mObservable, callback);
         }
     }
 
-    public <T> void execute(Observable observable, WeNetworkCallBack<T> callback) {
+    private <T> void execute(Observable observable, WeNetworkCallBack<T> callback) {
         //要先执行
-        netControl.preExecute(callback, observable);
+        netControl.bindLifeCircle(callback, observable);
     }
 
-
+    public void attachUrl(String url) {
+        mUrl = url;
+        netControl.addRequestParams(url, this);
+    }
 }

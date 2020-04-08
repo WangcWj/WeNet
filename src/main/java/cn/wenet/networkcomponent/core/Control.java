@@ -5,10 +5,13 @@ import android.content.Context;
 import java.util.Map;
 
 import cn.wenet.networkcomponent.base.BaseControl;
-import cn.wenet.networkcomponent.base.ComponentLifeCircle;
+import cn.wenet.networkcomponent.life.ComponentLifeCircle;
 import cn.wenet.networkcomponent.base.NetBaseObserver;
+import cn.wenet.networkcomponent.life.PageLifeManager;
+import cn.wenet.networkcomponent.life.WeNetLifeCircleManager;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import cn.wenet.networkcomponent.request.NetRequest;
+import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;
 import io.reactivex.Observable;
 import okhttp3.HttpUrl;
 
@@ -21,7 +24,7 @@ import okhttp3.HttpUrl;
 public class Control extends BaseControl implements ComponentLifeCircle {
 
     private Control() {
-
+        mLifeManager = new WeNetLifeCircleManager();
     }
 
     private static Control instance = null;
@@ -73,8 +76,18 @@ public class Control extends BaseControl implements ComponentLifeCircle {
         return mHaveInit;
     }
 
-    public WeNetLifeCircleManager getLifeManager(Context context) {
-        return null;
+    /**
+     * 获取网络请求生命周期的管理类。
+     *
+     * @param context
+     * @return {@link PageLifeManager} 管理一个界面的网络请求，可以是Activity可以是Fragment。
+     */
+    public PageLifeManager getLifeManager(Context context) {
+        //全局的单例模式。
+        if (mLifeManager == null) {
+            mLifeManager = new WeNetLifeCircleManager();
+        }
+        return mLifeManager.bindContext(context);
     }
 
     /**
@@ -82,7 +95,32 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      *
      * @return
      */
-    public NetRequest request() {
+    public <T> NetRequest request(WeNetResult<T> observable) {
+        if (observable instanceof WeNetResultObservable) {
+            WeNetResultObservable<T> resultObservable = (WeNetResultObservable<T>) observable;
+            return resultObservable.getNetRequest();
+        } else {
+            throw new IllegalArgumentException("WeNet: Parameter type must be WeNetResult!");
+        }
+    }
+
+    /**
+     * 开始网络请求
+     *
+     * @return
+     */
+    public <T> NetRequest request(Observable<T> observable) {
+        NetRequest request = request();
+        request.apiMethod(observable);
+        return request;
+    }
+
+    /**
+     * 开始网络请求
+     *
+     * @return
+     */
+    NetRequest request() {
         return new NetRequest(Control.getInstance());
     }
 
@@ -91,12 +129,18 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      *
      * @return
      */
-    public NetRequest requestJson() {
+    NetRequest requestJson() {
         return new NetRequest(Control.getInstance());
     }
 
-    public void preExecute(WeNetworkCallBack callback, Observable observable) {
-        WeNetLifeCircleManager lifeManager = getLifeManager(callback.getContext());
+    /**
+     * 开始网络请求之前，绑定生命周期。
+     *
+     * @param callback
+     * @param observable
+     */
+    public void bindLifeCircle(WeNetworkCallBack callback, Observable observable) {
+        PageLifeManager lifeManager = getLifeManager(callback.getContext());
         NetBaseObserver baseObserver = getBaseObserve(callback);
         baseObserver.setLifeCircleManager(lifeManager);
         subscribe(observable, baseObserver);
@@ -109,7 +153,7 @@ public class Control extends BaseControl implements ComponentLifeCircle {
 
     @Override
     public void onDestroy() {
-      instance = null;
+        instance = null;
 
     }
 }

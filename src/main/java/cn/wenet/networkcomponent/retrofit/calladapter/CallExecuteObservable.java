@@ -15,7 +15,7 @@ import retrofit2.Response;
  * @author cc.wang
  * @date 2020/3/27
  */
-public class CallExecuteObservable<T> extends Observable<Response<T>> {
+class CallExecuteObservable<T> extends Observable<Response<T>> {
     private final Call<T> originalCall;
 
     CallExecuteObservable(Call<T> originalCall) {

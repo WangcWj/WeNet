@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.request.NetRequest;
+import cn.wenet.networkcomponent.utils.RequestBodyUtils;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -32,11 +34,20 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
 
     public void addRequest(String url, NetRequest request) {
         if (null == mPatams) {
-            mPatams = new HashMap<>();
+            mPatams = new HashMap<>(20);
         }
         mPatams.put(url, request);
     }
 
+    public void removeRequest(String url) {
+        if (null != mPatams) {
+            mPatams.remove(url);
+        }
+    }
+
+    public Map<String, NetRequest> getPatams() {
+        return mPatams;
+    }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
@@ -51,16 +62,23 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
         }
         if (POST.equals(oriRequest.method()) && null != oriRequest.body()) {
             RequestBody body = oriRequest.body();
-            RequestBody newBody = null;
+            RequestBody newBody;
             if (body instanceof FormBody) {
                 //表单请求 也就是一般的POST请求.
                 newBody = addParamsToFormBody(request.getParams(), (FormBody) body);
             } else if (oriRequest.body() instanceof MultipartBody) {
                 //文件请求
                 newBody = addParamsToMultipartBody(request.getParams(), (MultipartBody) body);
-            }
-            if (null == newBody) {
-                return chain.proceed(oriRequest);
+            } else {
+                long l = body.contentLength();
+                //说明接口使用了@Body注解，并且设置了值。
+                if (l > 0 && request.isBody()) {
+                    WeDebug.e("说明接口使用了@Body注解，并且设置了值");
+                    newBody = body;
+                    RequestBodyUtils.appendToRequestBody(body);
+                } else {
+                    newBody = addParamsToFormBody(request.getParams(), null);
+                }
             }
             //重新组装Request
             Request.Builder builder = oriRequest.newBuilder()
@@ -78,6 +96,12 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
             return chain.proceed(requestBuilder.build());
         }
         return chain.proceed(oriRequest);
+    }
+
+    private RequestBody createFormBody(Map<String, Object> params) {
+
+
+        return null;
     }
 
     private HttpUrl addParamsToHttpUrl(Map<String, Object> params, HttpUrl httpUrl) {
@@ -106,7 +130,13 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
 
     private FormBody addParamsToFormBody(Map<String, Object> params, FormBody body) {
         FormBody.Builder builder = new FormBody.Builder();
-
+        if (null != body) {
+            for (int i = 0; i < body.size(); i++) {
+                String name = body.encodedName(i);
+                String value = body.encodedValue(i);
+                params.put(name, value);
+            }
+        }
         //添加新的参数
         if (params.size() > 0) {
             Iterator iterator = params.entrySet().iterator();
@@ -115,6 +145,7 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
                 builder.add((String) entry.getKey(), (String) entry.getValue());
             }
         }
+
         //添加原始的参数 目前是没有原始参数的.
         return builder.build();
     }

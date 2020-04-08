@@ -1,4 +1,4 @@
-package cn.wenet.networkcomponent.urlparse;
+package cn.wenet.networkcomponent.okhttp.parse;
 
 import okhttp3.HttpUrl;
 

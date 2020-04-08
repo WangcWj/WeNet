@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.util.Map;
 
 import cn.wenet.networkcomponent.core.Control;
-import cn.wenet.networkcomponent.core.WeNetwork;
+import cn.wenet.networkcomponent.core.WeNetWork;
 import cn.wenet.networkcomponent.debug.WeDebug;
-import cn.wenet.networkcomponent.okhttp.NetOkHttp;
-import cn.wenet.networkcomponent.urlparse.WeUrlParse;
+import cn.wenet.networkcomponent.okhttp.parse.WeUrlParse;
+import cn.wenet.networkcomponent.request.NetRequest;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -31,9 +31,14 @@ import okhttp3.Response;
 public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
 
     private WeUrlParse urlParse;
+    private BaseParamsInterceptor paramsInterceptor;
 
     public BaseUrlInterceptor() {
         urlParse = new WeUrlParse();
+    }
+
+    public void setParamsInterceptor(BaseParamsInterceptor paramsInterceptor) {
+        this.paramsInterceptor = paramsInterceptor;
     }
 
     @Override
@@ -44,7 +49,7 @@ public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
         WeDebug.e("Header  is  " + header);
         if (!TextUtils.isEmpty(header) && !Control.BASE_URL_HEADER.equals(header)) {
             WeDebug.e("检测到新的BaseUrl。。。。");
-            Map<String, HttpUrl> baseUrls = WeNetwork.getBaseUrls();
+            Map<String, HttpUrl> baseUrls = WeNetWork.getBaseUrls();
             HttpUrl httpUrl = baseUrls.get(header);
             if (null != httpUrl) {
                 HttpUrl newHttpUrl = urlParse.parseUrl(httpUrl, request.url());
@@ -52,6 +57,19 @@ public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
                 Request.Builder newBuilder = request.newBuilder();
                 newBuilder.removeHeader(Control.GLOBAL_HEADER);
                 Request newRequest = newBuilder.url(newHttpUrl).build();
+                String u = request.url().toString();
+                Map<String, NetRequest> params = null;
+                if (null != paramsInterceptor) {
+                    params = paramsInterceptor.getPatams();
+                    if (null != params) {
+                        if (params.containsKey(u)) {
+                            NetRequest netRequest = params.get(u);
+                            paramsInterceptor.removeRequest(u);
+                            String url = newHttpUrl.toString();
+                            paramsInterceptor.addRequest(url, netRequest);
+                        }
+                    }
+                }
                 return chain.proceed(newRequest);
             }
         }
