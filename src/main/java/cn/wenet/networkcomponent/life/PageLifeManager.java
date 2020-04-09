@@ -1,7 +1,7 @@
 package cn.wenet.networkcomponent.life;
 
-import android.util.Log;
 
+import cn.wenet.networkcomponent.debug.WeDebug;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -25,12 +25,14 @@ public class PageLifeManager implements WeNetLifecycleControl {
         if (null == mDisposable) {
             mDisposable = new CompositeDisposable();
         }
+        WeDebug.e("PageLifeManager requestStart" + mDisposable.size());
         mDisposable.add(disposable);
     }
 
     @Override
     public void requestEnd(Disposable disposable) {
         if (null != disposable && null != mDisposable) {
+            WeDebug.e("PageLifeManager requestEnd" + mDisposable.size());
             mDisposable.remove(disposable);
         }
     }
@@ -38,10 +40,11 @@ public class PageLifeManager implements WeNetLifecycleControl {
     @Override
     public void pageDestroy() {
         if (null != mDisposable && mDisposable.isDisposed()) {
+            WeDebug.e("PageLifeManager pageDestroy 有网络没取消掉 " + mDisposable.size());
             mDisposable.dispose();
         }
         mDisposable = null;
-        Log.e("cc.wang", "PageLifeManager.pageDestroy.");
+        WeDebug.e("PageLifeManager pageDestroy");
     }
 
 

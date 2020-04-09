@@ -1,13 +1,17 @@
 package cn.wenet.networkcomponent.request;
 
 
+import android.text.TextUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;
+import cn.wenet.networkcomponent.utils.GsonUtils;
 import io.reactivex.Observable;
+import okhttp3.MediaType;
 
 /**
  * @author WANG
@@ -16,6 +20,35 @@ import io.reactivex.Observable;
  * 1.这里管理基础参数
  * 2.管理Header的添加
  * 3.管理文件上传RequestBody
+ * <p>
+ * GsonConverterFactory处理的参数注解有： @Body、@Part、@PartMap。
+ * <p>
+ * 链式调用支持的请求方式：
+ * {
+ * POST请求：有请求体。
+ * <p>
+ * 1.表单请求，也就是RequestBody为FormBody。
+ * 支持的注解{@link retrofit2.http.Field,retrofit2.http.FieldMap}。
+ * <p>
+ * 2.RequestBody请求，也就是请求的实体就是RequestBody。
+ * 支持的注解{@link retrofit2.http.Body}。
+ * <p>
+ * GET请求：没有请求体。
+ * <p>
+ * 支持的注解{@link retrofit2.http.Query,retrofit2.http.QueryMap}
+ * <p>
+ * }
+ * <p>
+ * { 如果使用了@Body的参数注解，该注解的类型可以是Object，一般的使用是 (@Body RequestBody body)或者(@Body Object obj)
+ * 以下几种情况：
+ * 1.参数类型是RequestBody：处理该注解的Converter是默认的BuiltInConverters。
+ * 2.参数类型是实体类，基本数据类型：处理该注解的Converter是GsonRequestBodyConverter。
+ * 3.参数类型是String：处理该注解的Converter是ToStringConverterFactory自定义的。
+ * <p>
+ *
+ *
+ * <p>
+ * }
  */
 
 public class NetRequest {
@@ -30,10 +63,11 @@ public class NetRequest {
 
     private String mUrl;
 
+    private String mBodyJson = "";
+
     private boolean isBody = false;
 
     private boolean isForm = true;
-
 
     public NetRequest(Control netControl) {
         this.netControl = netControl;
@@ -47,6 +81,10 @@ public class NetRequest {
 
     public String getUrl() {
         return mUrl;
+    }
+
+    public String getBodyJson() {
+        return mBodyJson;
     }
 
     public Observable getObservable() {
@@ -67,6 +105,40 @@ public class NetRequest {
 
     public NetRequest asFrom() {
         this.isForm = true;
+        return this;
+    }
+
+    public NetRequest bodyToJson(String json) {
+        checkBody();
+        mBodyJson = json;
+        return this;
+    }
+
+    public NetRequest bodyToJson(Object o) {
+        if (null != o) {
+            String toJson = GsonUtils.objectToJson(o);
+            if (!TextUtils.isEmpty(toJson)) {
+                bodyToJson(toJson);
+            } else {
+                throw new IllegalArgumentException("NetRequest: NetRequest#bodyToJson()参数类型" + o.getClass().getName() + "不支持");
+            }
+        }
+        return this;
+    }
+
+    private void checkBody() {
+        if (!isBody) {
+            throw new IllegalStateException("NetRequest: 请先调用 NetRequest#asBody() 方法！");
+        }
+    }
+
+    public NetRequest bodyToRequestBody(Object o) {
+        if (null != o) {
+            String toJson = GsonUtils.objectToJson(o);
+            if (!TextUtils.isEmpty(toJson)) {
+
+            }
+        }
         return this;
     }
 

@@ -60,7 +60,7 @@ public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
                 String u = request.url().toString();
                 Map<String, NetRequest> params = null;
                 if (null != paramsInterceptor) {
-                    params = paramsInterceptor.getPatams();
+                    params = paramsInterceptor.getParams();
                     if (null != params) {
                         if (params.containsKey(u)) {
                             NetRequest netRequest = params.get(u);

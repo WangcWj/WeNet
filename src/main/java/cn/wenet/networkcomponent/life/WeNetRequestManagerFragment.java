@@ -17,6 +17,10 @@ public class WeNetRequestManagerFragment extends Fragment {
 
     private PageLifeManager pageLifeManager;
 
+    public WeNetRequestManagerFragment() {
+        pageLifeManager = new PageLifeManager();
+    }
+
     public static WeNetRequestManagerFragment getInstance() {
         return new WeNetRequestManagerFragment();
     }
@@ -39,6 +43,5 @@ public class WeNetRequestManagerFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.e("cc.wang","WeNetRequestManagerFragment.onCreate.");
-        pageLifeManager = new PageLifeManager();
     }
 }

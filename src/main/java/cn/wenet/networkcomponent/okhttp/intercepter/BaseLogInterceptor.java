@@ -24,6 +24,8 @@ import okio.Buffer;
 import okio.BufferedSource;
 
 /**
+ * 打印网络信息日志，参考HttpLoggingInterceptor实现。
+ *
  * @author WANG
  * @date 2018/5/3
  */
@@ -34,6 +36,7 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
+        WeDebug.e("BaseLogInterceptor ========");
         if (WeDebug.DEBUG) {
             HttpUrl httpUrl = request.url();
 

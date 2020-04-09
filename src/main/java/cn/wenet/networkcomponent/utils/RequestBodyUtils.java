@@ -2,8 +2,12 @@ package cn.wenet.networkcomponent.utils;
 
 import android.text.TextUtils;
 
+import com.google.gson.stream.JsonWriter;
+
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 
 import cn.wenet.networkcomponent.debug.WeDebug;
@@ -12,7 +16,7 @@ import okhttp3.RequestBody;
 import okio.Buffer;
 
 /**
- * Created to :
+ * Created to : 对RequestBody的一些操作方法。
  *
  * @author cc.wang
  * @date 2020/4/8
@@ -20,6 +24,7 @@ import okio.Buffer;
 public class RequestBodyUtils {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
+    public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=UTF-8");
 
     public static String requestBodyToString(RequestBody requestBody) throws IOException {
         Buffer buffer = new Buffer();
@@ -29,21 +34,15 @@ public class RequestBodyUtils {
         if (contentType != null) {
             charset = contentType.charset(UTF8);
         }
+        if (null == charset) {
+            charset = UTF8;
+        }
         if (isPlaintext(buffer)) {
-            String readString = buffer.readString(charset);
-            return readString;
+            return buffer.readString(charset);
         } else {
             WeDebug.e("RequestBody 内容不是文本格式！");
         }
         return "";
-    }
-
-    public static void appendToRequestBody(RequestBody requestBody)throws IOException{
-        String read = requestBodyToString(requestBody);
-        //city=%E6%B4%9B%E9%98%B3&key=a1ae58f53edaf0518c72f41adc3987a9
-        if(!TextUtils.isEmpty(read)){
-            WeDebug.e("准备 拼接到 RequestBody");
-        }
     }
 
     public static boolean isPlaintext(Buffer buffer) {

@@ -1,7 +1,5 @@
 package cn.wenet.networkcomponent.retrofit;
 
-import android.util.Log;
-
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.retrofit.convert.ToStringConverterFactory;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetCallAdapterFactory;

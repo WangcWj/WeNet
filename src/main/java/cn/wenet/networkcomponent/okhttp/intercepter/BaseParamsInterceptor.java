@@ -1,6 +1,8 @@
 package cn.wenet.networkcomponent.okhttp.intercepter;
 
 
+import android.text.TextUtils;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,7 +47,7 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
         }
     }
 
-    public Map<String, NetRequest> getPatams() {
+    public Map<String, NetRequest> getParams() {
         return mPatams;
     }
 
@@ -72,12 +74,15 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
             } else {
                 long l = body.contentLength();
                 //说明接口使用了@Body注解，并且设置了值。
-                if (l > 0 && request.isBody()) {
-                    WeDebug.e("说明接口使用了@Body注解，并且设置了值");
+                if (l > 0) {
                     newBody = body;
-                    RequestBodyUtils.appendToRequestBody(body);
                 } else {
-                    newBody = addParamsToFormBody(request.getParams(), null);
+                    if (request.isBody()) {
+                        String bodyJson = request.getBodyJson();
+                        newBody = createFormBody(bodyJson);
+                    } else {
+                        newBody = addParamsToFormBody(request.getParams(), null);
+                    }
                 }
             }
             //重新组装Request
@@ -98,10 +103,11 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
         return chain.proceed(oriRequest);
     }
 
-    private RequestBody createFormBody(Map<String, Object> params) {
-
-
-        return null;
+    private RequestBody createFormBody(String json) {
+        if (TextUtils.isEmpty(json)) {
+            json = "";
+        }
+        return RequestBody.create(RequestBodyUtils.MEDIA_TYPE_JSON, json);
     }
 
     private HttpUrl addParamsToHttpUrl(Map<String, Object> params, HttpUrl httpUrl) {

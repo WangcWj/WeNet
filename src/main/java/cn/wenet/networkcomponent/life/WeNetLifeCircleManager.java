@@ -38,7 +38,6 @@ public class WeNetLifeCircleManager {
 
     private PageLifeManager supportFragmentGet(Context context, FragmentManager fragmentManager) {
         WeNetRequestManagerFragment tag = (WeNetRequestManagerFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
-        Log.e("cc.wang","WeNetLifeCircleManager.supportFragmentGet."+tag);
         if (null == tag) {
             tag = WeNetRequestManagerFragment.getInstance();
             fragmentManager.beginTransaction().add(tag, FRAGMENT_TAG).commitAllowingStateLoss();
