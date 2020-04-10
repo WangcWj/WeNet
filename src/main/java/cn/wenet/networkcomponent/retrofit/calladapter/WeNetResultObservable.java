@@ -1,8 +1,14 @@
 package cn.wenet.networkcomponent.retrofit.calladapter;
 
+import android.app.Dialog;
+import android.content.Context;
+
+import androidx.fragment.app.Fragment;
+
+import cn.wenet.networkcomponent.core.WeNetRequest;
 import cn.wenet.networkcomponent.core.WeNetResult;
 import cn.wenet.networkcomponent.core.WeNetWork;
-import cn.wenet.networkcomponent.request.NetRequest;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -22,47 +28,64 @@ import retrofit2.adapter.rxjava2.HttpException;
 public class WeNetResultObservable<T> extends Observable<T> implements WeNetResult<T> {
     private final Observable<Response<T>> upstream;
     private Request mCurrentRequest;
-
-    private NetRequest netRequest;
+    private WeNetRequest mNetRequest;
 
     WeNetResultObservable(Observable<Response<T>> upstream, Request request) {
         super();
         this.upstream = upstream;
         mCurrentRequest = request;
-        netRequest = WeNetWork.request();
-        netRequest.setNetObservable(this);
+        mNetRequest = WeNetWork.request();
+        ((NetRequestImpl)mNetRequest).setNetObservable(this);
     }
 
     @Override
     protected void subscribeActual(Observer<? super T> observer) {
-        if (null != mCurrentRequest && null != netRequest) {
+        if (null != mCurrentRequest && null != mNetRequest) {
             //要处理多BaseUrl的情况
             String url = mCurrentRequest.url().toString();
-            netRequest.attachUrl(url);
+            ((NetRequestImpl)mNetRequest).attachUrl(url);
         }
         upstream.subscribe(new WeNetResultObservable.BodyObserver<T>(observer));
     }
 
     @Override
-    public NetRequest addParams(String key, String value) {
-        netRequest.addParams(key, value);
-        return netRequest;
+    public WeNetRequest addParams(String key, String value) {
+        mNetRequest.addParams(key, value);
+        return mNetRequest;
     }
 
     @Override
-    public NetRequest asBody() {
-        netRequest.asBody();
-        return netRequest;
+    public WeNetRequest asBody() {
+        mNetRequest.asBody();
+        return mNetRequest;
     }
 
     @Override
-    public NetRequest asFrom() {
-        netRequest.asFrom();
-        return netRequest;
+    public WeNetRequest asFrom() {
+        mNetRequest.asFrom();
+        return mNetRequest;
     }
 
-    public NetRequest getNetRequest() {
-        return netRequest;
+    @Override
+    public WeNetRequest bindLife(Context context) {
+        mNetRequest.bindLife(context);
+        return mNetRequest;
+    }
+
+    @Override
+    public WeNetRequest bindLife(Fragment fragment) {
+        mNetRequest.bindLife(fragment);
+        return mNetRequest;
+    }
+
+    @Override
+    public WeNetRequest bindLife(Dialog dialog) {
+        mNetRequest.bindLife(dialog);
+        return mNetRequest;
+    }
+
+    public WeNetRequest getNetRequestImpl() {
+        return mNetRequest;
     }
 
     private static class BodyObserver<R> implements Observer<Response<R>> {

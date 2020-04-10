@@ -9,9 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import cn.wenet.networkcomponent.core.Control;
-import cn.wenet.networkcomponent.debug.WeDebug;
-import cn.wenet.networkcomponent.request.NetRequest;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 import cn.wenet.networkcomponent.utils.RequestBodyUtils;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
@@ -32,9 +30,9 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
     private final String POST = "POST";
     private final String GET = "GET";
 
-    private Map<String, NetRequest> mPatams;
+    private Map<String, NetRequestImpl> mPatams;
 
-    public void addRequest(String url, NetRequest request) {
+    public void addRequest(String url, NetRequestImpl request) {
         if (null == mPatams) {
             mPatams = new HashMap<>(20);
         }
@@ -47,7 +45,7 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
         }
     }
 
-    public Map<String, NetRequest> getParams() {
+    public Map<String, NetRequestImpl> getParams() {
         return mPatams;
     }
 
@@ -58,7 +56,7 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
             return chain.proceed(oriRequest);
         }
         String url = oriRequest.url().toString();
-        NetRequest request = mPatams.get(url);
+        NetRequestImpl request = mPatams.get(url);
         if (null == request || null == request.getParams()) {
             return chain.proceed(oriRequest);
         }

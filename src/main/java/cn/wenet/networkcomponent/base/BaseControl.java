@@ -15,9 +15,10 @@ import cn.wenet.networkcomponent.okhttp.intercepter.BaseUrlInterceptor;
 import cn.wenet.networkcomponent.okhttp.intercepter.NetInterceptorFactory;
 import cn.wenet.networkcomponent.okhttp.NetOkHttp;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
-import cn.wenet.networkcomponent.request.NetRequest;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 import cn.wenet.networkcomponent.retrofit.NetRetrofit;
 import cn.wenet.networkcomponent.rxjava.NetRetryWhen;
+import cn.wenet.networkcomponent.utils.ThreadUtils;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -57,7 +58,7 @@ public class BaseControl {
         return mBaseParams;
     }
 
-    public void addRequestParams(String url, NetRequest request) {
+    public void addRequestParams(String url, NetRequestImpl request) {
         if (null != paramsInterceptor) {
             paramsInterceptor.addRequest(url, request);
         }
@@ -139,7 +140,15 @@ public class BaseControl {
         return apiService;
     }
 
+
     public void init(Context context) {
+        if (!ThreadUtils.isMainThread()) {
+            WeDebug.e("请在主线程中初始化该框架！");
+            return;
+        }
+        if (mHaveInit) {
+            return;
+        }
         mApplicationContext = context;
         mNetOkHttp = NetOkHttp.getInstance();
         mNetRetrofit = NetRetrofit.getInstance();

@@ -1,6 +1,10 @@
 package cn.wenet.networkcomponent.life;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -16,6 +20,17 @@ public class PageLifeManager implements WeNetLifecycleControl {
 
 
     private CompositeDisposable mDisposable;
+    private List<WeNetworkCallBack> mCacheCallback;
+
+    public void addCallBack(WeNetworkCallBack callBack){
+        if(null == mCacheCallback){
+            mCacheCallback = new ArrayList<>();
+        }
+        if(!mCacheCallback.contains(callBack)){
+            mCacheCallback.add(callBack);
+        }
+    }
+
 
     @Override
     public void requestStart(Disposable disposable) {

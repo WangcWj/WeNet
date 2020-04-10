@@ -1,17 +1,14 @@
 package cn.wenet.networkcomponent.core;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 import cn.wenet.networkcomponent.base.NetBaseParam;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
-import cn.wenet.networkcomponent.request.NetRequest;
 import io.reactivex.Observable;
 import okhttp3.HttpUrl;
 
@@ -19,6 +16,8 @@ import okhttp3.HttpUrl;
  * @author WANG
  */
 public class WeNetWork {
+
+    private Context mApplicationContext;
 
     private WeNetWork() {
 
@@ -31,10 +30,7 @@ public class WeNetWork {
      * @return
      */
     public static WeNetWork init(Context context) {
-        Control instance = Control.getInstance();
-        if (!instance.isHaveInit()) {
-            instance.init(context);
-        }
+        Control.getInstance().init(context);
         return new WeNetWork();
     }
 
@@ -61,7 +57,7 @@ public class WeNetWork {
      * @return
      */
     public WeNetWork addBaseUrl(String flag, String url) {
-        Control.getInstance().addBaseUrl(flag,url);
+        Control.getInstance().addBaseUrl(flag, url);
         return this;
     }
 
@@ -74,7 +70,7 @@ public class WeNetWork {
      *
      * @return
      */
-    public static <T>NetRequest request(WeNetResult<T> observable) {
+    public static <T> WeNetRequest request(WeNetResult<T> observable) {
         return Control.getInstance().request(observable);
     }
 
@@ -83,11 +79,11 @@ public class WeNetWork {
      *
      * @return
      */
-    public static <T>NetRequest request(Observable<T> observable) {
+    public static <T> WeNetRequest request(Observable<T> observable) {
         return Control.getInstance().request(observable);
     }
 
-    public static Map<String,Object> getBaseParams(){
+    public static Map<String, Object> getBaseParams() {
         return Control.getInstance().getBaseParams();
     }
 
@@ -96,17 +92,8 @@ public class WeNetWork {
      *
      * @return
      */
-    public static NetRequest request() {
+    public static WeNetRequest request() {
         return Control.getInstance().request();
-    }
-
-    /**
-     * 开始网络请求，每个网络请求都是从这里开始的。
-     *
-     * @return
-     */
-    public static NetRequest requestJson() {
-        return Control.getInstance().requestJson();
     }
 
     /**
@@ -116,14 +103,14 @@ public class WeNetWork {
      * @param <T>
      * @return
      */
-    public static <T>T getApiServiceInstance(Class<T> clz){
+    public static <T> T getApiServiceInstance(Class<T> clz) {
         return Control.getInstance().getApiService(clz);
     }
 
     /**
      * 这里用来手动销毁资源
      */
-    public static void destroy(){
+    public static void destroy() {
 
     }
 

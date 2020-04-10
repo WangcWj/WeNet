@@ -1,17 +1,22 @@
 package cn.wenet.networkcomponent.request;
 
 
+import android.app.Dialog;
+import android.content.Context;
 import android.text.TextUtils;
+
+import androidx.fragment.app.Fragment;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.core.WeNetRequest;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
+import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;
 import cn.wenet.networkcomponent.utils.GsonUtils;
 import io.reactivex.Observable;
-import okhttp3.MediaType;
 
 /**
  * @author WANG
@@ -51,11 +56,13 @@ import okhttp3.MediaType;
  * }
  */
 
-public class NetRequest {
+public class NetRequestImpl implements WeNetRequest {
 
     private Control netControl;
 
     private WeNetResultObservable mNetObservable;
+
+    private PageLifeManager mPageLifeManager;
 
     private Observable mObservable;
 
@@ -69,106 +76,117 @@ public class NetRequest {
 
     private boolean isForm = true;
 
-    public NetRequest(Control netControl) {
+    public NetRequestImpl(Control netControl) {
         this.netControl = netControl;
         mParams = new HashMap<>();
         mParams.putAll(netControl.mBaseParams);
     }
 
+    @Override
     public Map<String, Object> getParams() {
         return mParams;
     }
 
+    @Override
     public String getUrl() {
         return mUrl;
     }
 
-    public String getBodyJson() {
-        return mBodyJson;
-    }
-
+    @Override
     public Observable getObservable() {
         if (null != mNetObservable) {
-            //要先执行NetObservable。
             return mNetObservable;
         } else if (null != mObservable) {
-            //再执行Observable。
             return mObservable;
         }
         return null;
     }
 
-    public NetRequest asBody() {
+    @Override
+    public boolean isBody() {
+        return isBody;
+    }
+
+    @Override
+    public boolean isForm() {
+        return isForm;
+    }
+
+    @Override
+    public NetRequestImpl asBody() {
         this.isBody = true;
         return this;
     }
 
-    public NetRequest asFrom() {
+    @Override
+    public NetRequestImpl asFrom() {
         this.isForm = true;
         return this;
     }
 
-    public NetRequest bodyToJson(String json) {
+    @Override
+    public NetRequestImpl bodyToJson(String json) {
         checkBody();
         mBodyJson = json;
         return this;
     }
 
-    public NetRequest bodyToJson(Object o) {
+    @Override
+    public NetRequestImpl bodyToJson(Object o) {
         if (null != o) {
             String toJson = GsonUtils.objectToJson(o);
             if (!TextUtils.isEmpty(toJson)) {
                 bodyToJson(toJson);
             } else {
-                throw new IllegalArgumentException("NetRequest: NetRequest#bodyToJson()参数类型" + o.getClass().getName() + "不支持");
+                throw new IllegalArgumentException("NetRequestImpl: NetRequestImpl#bodyToJson()参数类型" + o.getClass().getName() + "不支持");
             }
         }
         return this;
     }
 
-    private void checkBody() {
-        if (!isBody) {
-            throw new IllegalStateException("NetRequest: 请先调用 NetRequest#asBody() 方法！");
-        }
-    }
-
-    public NetRequest bodyToRequestBody(Object o) {
-        if (null != o) {
-            String toJson = GsonUtils.objectToJson(o);
-            if (!TextUtils.isEmpty(toJson)) {
-
-            }
-        }
-        return this;
-    }
-
-    public NetRequest addParams(String key, String value) {
+    @Override
+    public NetRequestImpl addParams(String key, String value) {
         mParams.put(key, value);
         return this;
     }
 
-    public NetRequest addParams(Map params) {
+    @Override
+    public NetRequestImpl addParams(Map<String, Object> params) {
         mParams.putAll(params);
         return this;
     }
 
-    public boolean isBody() {
-        return isBody;
+    @Override
+    public WeNetRequest bindLife(Context context) {
+        if (null == mPageLifeManager) {
+            mPageLifeManager = netControl.bindContext(context);
+        }
+        return this;
     }
 
-    public boolean isForm() {
-        return isForm;
+    @Override
+    public WeNetRequest bindLife(Fragment fragment) {
+        if (null == mPageLifeManager) {
+            mPageLifeManager = netControl.bindFragment(fragment);
+        }
+        return this;
     }
 
-    public void setNetObservable(WeNetResultObservable netObservable) {
-        mNetObservable = netObservable;
+    @Override
+    public WeNetRequest bindLife(Dialog dialog) {
+        if (null == mPageLifeManager) {
+            mPageLifeManager = netControl.bindDialog(dialog);
+        }
+        return this;
     }
 
-    public <T> NetRequest apiMethod(Observable<T> observable) {
+    @Override
+    public <T> NetRequestImpl apiMethod(Observable<T> observable) {
         mObservable = observable;
         return this;
     }
 
+    @Override
     public <T> void execute(WeNetworkCallBack<T> callback) {
         if (null != mNetObservable) {
             //要先执行NetObservable。
@@ -179,13 +197,28 @@ public class NetRequest {
         }
     }
 
-    private <T> void execute(Observable observable, WeNetworkCallBack<T> callback) {
-        //要先执行
-        netControl.bindLifeCircle(callback, observable);
+    public void setNetObservable(WeNetResultObservable netObservable) {
+        mNetObservable = netObservable;
     }
 
     public void attachUrl(String url) {
         mUrl = url;
         netControl.addRequestParams(url, this);
     }
+
+    public String getBodyJson() {
+        return mBodyJson;
+    }
+
+    private void checkBody() {
+        if (!isBody) {
+            throw new IllegalStateException("NetRequestImpl: 请先调用 NetRequestImpl#asBody() 方法！");
+        }
+    }
+
+    private <T> void execute(Observable observable, WeNetworkCallBack<T> callback) {
+        //要先执行
+        netControl.execute(mPageLifeManager, observable, callback);
+    }
+
 }

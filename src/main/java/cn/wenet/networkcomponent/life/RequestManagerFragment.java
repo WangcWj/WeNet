@@ -14,11 +14,11 @@ import cn.wenet.networkcomponent.debug.WeDebug;
  * @author cc.wang
  * @date 2020/4/7
  */
-public class WeNetRequestManagerFragment extends Fragment {
+public class RequestManagerFragment extends Fragment {
 
     private PageLifeManager pageLifeManager;
 
-    public WeNetRequestManagerFragment() {
+    public RequestManagerFragment() {
         pageLifeManager = new PageLifeManager();
     }
 
@@ -32,13 +32,13 @@ public class WeNetRequestManagerFragment extends Fragment {
             pageLifeManager.pageDestroy();
         }
         super.onDestroy();
-        WeDebug.e("WeNetRequestManagerFragment.onDestroy");
+        WeDebug.e("RequestManagerFragment.onDestroy");
         pageLifeManager = null;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WeDebug.e("WeNetRequestManagerFragment.onCreate");
+        WeDebug.e("RequestManagerFragment.onCreate");
     }
 }

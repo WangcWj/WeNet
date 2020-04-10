@@ -1,8 +1,6 @@
 package cn.wenet.networkcomponent.core;
 
 
-import android.content.Context;
-
 import cn.wenet.networkcomponent.exception.NetException;
 
 /**
@@ -13,16 +11,6 @@ import cn.wenet.networkcomponent.exception.NetException;
  */
 
 public abstract class WeNetworkCallBack<T> {
-
-    private Context mContext;
-
-    public WeNetworkCallBack(Context context) {
-        mContext = context;
-    }
-
-    public Context getContext() {
-        return mContext;
-    }
 
     public abstract void onSuccess(T t);
 

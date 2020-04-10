@@ -10,7 +10,7 @@ import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.core.WeNetWork;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.okhttp.parse.WeUrlParse;
-import cn.wenet.networkcomponent.request.NetRequest;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -58,15 +58,15 @@ public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
                 newBuilder.removeHeader(Control.GLOBAL_HEADER);
                 Request newRequest = newBuilder.url(newHttpUrl).build();
                 String u = request.url().toString();
-                Map<String, NetRequest> params = null;
+                Map<String, NetRequestImpl> params = null;
                 if (null != paramsInterceptor) {
                     params = paramsInterceptor.getParams();
                     if (null != params) {
                         if (params.containsKey(u)) {
-                            NetRequest netRequest = params.get(u);
+                            NetRequestImpl netRequestImpl = params.get(u);
                             paramsInterceptor.removeRequest(u);
                             String url = newHttpUrl.toString();
-                            paramsInterceptor.addRequest(url, netRequest);
+                            paramsInterceptor.addRequest(url, netRequestImpl);
                         }
                     }
                 }

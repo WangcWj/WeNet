@@ -1,6 +1,8 @@
 package cn.wenet.networkcomponent.base;
 
 
+import androidx.annotation.Nullable;
+
 import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.exception.NetException;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
@@ -26,7 +28,7 @@ public class NetBaseObserver<T> implements Observer<T> {
         this.netCallBack = netCallBack;
     }
 
-    public void setLifeCircleManager(PageLifeManager lifeCircleManager) {
+    public void setLifeCircleManager(@Nullable PageLifeManager lifeCircleManager) {
         this.lifeCircleManager = lifeCircleManager;
     }
 

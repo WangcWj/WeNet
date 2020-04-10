@@ -1,6 +1,9 @@
 package cn.wenet.networkcomponent.core;
 
-import cn.wenet.networkcomponent.request.NetRequest;
+import android.app.Dialog;
+import android.content.Context;
+
+import androidx.fragment.app.Fragment;
 
 /**
  * Created to :
@@ -17,10 +20,41 @@ public interface WeNetResult<T> {
      * @param value 表单提交的value。
      * @return 网络请求实体类。
      */
-    NetRequest addParams(String key, String value);
+    WeNetRequest addParams(String key, String value);
 
-    NetRequest asBody();
+    /**
+     * 请求的参数通过RequestBody上传。
+     *
+     * @return
+     */
+    WeNetRequest asBody();
 
-    NetRequest asFrom();
+    /**
+     * 表单提交key value形式。
+     *
+     * @return
+     */
+    WeNetRequest asFrom();
+
+    /**
+     * 网络请求的生命周期跟Activity界面绑定。
+     *
+     * @param context
+     */
+    WeNetRequest bindLife(Context context);
+
+    /**
+     * 网络请求的生命周期跟Fragment绑定。
+     *
+     * @param fragment
+     */
+    WeNetRequest bindLife(Fragment fragment);
+
+    /**
+     * 网络请求的生命周期跟Dialog绑定。
+     *
+     * @param dialog
+     */
+    WeNetRequest bindLife(Dialog dialog);
 
 }
