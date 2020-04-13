@@ -12,6 +12,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
+import io.reactivex.internal.schedulers.SingleScheduler;
 
 /**
  * 错误重连机制,可以自定义重连的次数和下次请求发出之间的时间间隔
@@ -26,7 +27,8 @@ public class NetRetryWhen implements Function<Observable<Throwable>, ObservableS
     private int mRetryCurrent = 0;
     private long mRetryWhenTime;
 
-    public NetRetryWhen(int mRetryCount, long mRetryWhenTime) {
+    public void reset(int mRetryCount, long mRetryWhenTime){
+        mRetryCurrent = 0;
         this.mRetryCount = mRetryCount;
         this.mRetryWhenTime = mRetryWhenTime;
     }
@@ -44,7 +46,8 @@ public class NetRetryWhen implements Function<Observable<Throwable>, ObservableS
                 boolean isConnectionError = throwable instanceof ConnectException || throwable instanceof TimeoutException;
                 if (isNetError || isConnectionError) {
                     mRetryCurrent++;
-                    return Observable.timer(mRetryWhenTime, TimeUnit.MILLISECONDS);
+                    SingleScheduler scheduler = new SingleScheduler();
+                    return Observable.timer(mRetryWhenTime, TimeUnit.MILLISECONDS, scheduler);
                 }
                 return Observable.error(throwable);
             }

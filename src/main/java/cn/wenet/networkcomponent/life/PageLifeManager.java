@@ -1,11 +1,12 @@
 package cn.wenet.networkcomponent.life;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 
-import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.debug.WeDebug;
+import cn.wenet.networkcomponent.utils.ThreadUtils;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -20,17 +21,15 @@ public class PageLifeManager implements WeNetLifecycleControl {
 
 
     private CompositeDisposable mDisposable;
-    private List<WeNetworkCallBack> mCacheCallback;
+    private final Set<ComponentLifeCircle> mLifeCircles = Collections.newSetFromMap(new WeakHashMap<ComponentLifeCircle, Boolean>());
 
-    public void addCallBack(WeNetworkCallBack callBack){
-        if(null == mCacheCallback){
-            mCacheCallback = new ArrayList<>();
-        }
-        if(!mCacheCallback.contains(callBack)){
-            mCacheCallback.add(callBack);
-        }
+    public void register(ComponentLifeCircle lifeCircle) {
+        mLifeCircles.add(lifeCircle);
     }
 
+    public void unRegister(ComponentLifeCircle lifeCircle) {
+        mLifeCircles.remove(lifeCircle);
+    }
 
     @Override
     public void requestStart(Disposable disposable) {
@@ -54,10 +53,16 @@ public class PageLifeManager implements WeNetLifecycleControl {
 
     @Override
     public void pageDestroy() {
-        if (null != mDisposable && mDisposable.isDisposed()) {
+        //取消掉未结束的网络请求，比如说取消掉接口超时时的网络重试机制。
+        if (null != mDisposable && !mDisposable.isDisposed()) {
             WeDebug.e("PageLifeManager pageDestroy 有网络没取消掉 " + mDisposable.size());
             mDisposable.dispose();
         }
+        //NetBaseObserver的生命周期的控制。
+        for (ComponentLifeCircle lifecycleListener : ThreadUtils.getSnapshot(mLifeCircles)) {
+            lifecycleListener.onDestroy();
+        }
+        mLifeCircles.clear();
         mDisposable = null;
         WeDebug.e("PageLifeManager pageDestroy");
     }

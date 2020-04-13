@@ -3,6 +3,7 @@ package cn.wenet.networkcomponent.base;
 
 import androidx.annotation.Nullable;
 
+import cn.wenet.networkcomponent.life.ComponentLifeCircle;
 import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.exception.NetException;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
@@ -17,7 +18,7 @@ import io.reactivex.disposables.Disposable;
  * 2.是非标准的.数据原样返回.
  */
 
-public class NetBaseObserver<T> implements Observer<T> {
+public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
 
     private WeNetworkCallBack netCallBack;
@@ -30,6 +31,22 @@ public class NetBaseObserver<T> implements Observer<T> {
 
     public void setLifeCircleManager(@Nullable PageLifeManager lifeCircleManager) {
         this.lifeCircleManager = lifeCircleManager;
+        if (null != lifeCircleManager) {
+            lifeCircleManager.register(this);
+        }
+    }
+
+    private void requestFinish() {
+        if (null != lifeCircleManager) {
+            lifeCircleManager.unRegister(this);
+        }
+        clearData();
+    }
+
+    private void clearData() {
+        netCallBack = null;
+        lifeCircleManager = null;
+        mCurrentDisposable = null;
     }
 
     @Override
@@ -39,6 +56,7 @@ public class NetBaseObserver<T> implements Observer<T> {
         }
         NetException netException = new NetException(e);
         netCallBack.onError(netException);
+        requestFinish();
     }
 
     @Override
@@ -84,15 +102,17 @@ public class NetBaseObserver<T> implements Observer<T> {
             if (null != lifeCircleManager) {
                 lifeCircleManager.requestEnd(mCurrentDisposable);
             }
-            clearData();
+            requestFinish();
         }
     }
 
-    private void clearData() {
-        netCallBack = null;
-        lifeCircleManager = null;
-        mCurrentDisposable = null;
+    @Override
+    public void onCreate() {
+        //do nothing
     }
 
-
+    @Override
+    public void onDestroy() {
+        clearData();
+    }
 }

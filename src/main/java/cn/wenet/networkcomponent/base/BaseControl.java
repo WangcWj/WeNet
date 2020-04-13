@@ -35,8 +35,6 @@ public class BaseControl {
 
     private Context mApplicationContext;
 
-    private NetBaseObserver mNetBaseObserver;
-
     private NetRetryWhen retryWhen;
 
     protected volatile boolean mHaveInit = false;
@@ -96,11 +94,9 @@ public class BaseControl {
      * @return
      */
     public NetBaseObserver getBaseObserve(WeNetworkCallBack netCallBack) {
-        if (null == mNetBaseObserver) {
-            mNetBaseObserver = new NetBaseObserver();
-        }
-        mNetBaseObserver.setNetCallBack(netCallBack);
-        return mNetBaseObserver;
+        NetBaseObserver observer = new NetBaseObserver();
+        observer.setNetCallBack(netCallBack);
+        return observer;
     }
 
     /**
@@ -113,8 +109,9 @@ public class BaseControl {
     protected <T> void toSubscribe(Observable<T> observable, NetBaseObserver<T> observer) {
         if (null == retryWhen) {
             //错误重连的次数跟每次重连之间的间隔.
-            retryWhen = new NetRetryWhen(NetBaseParam.RETRYWHEN_COUNT, NetBaseParam.RETRYWHEN_TIME);
+            retryWhen = new NetRetryWhen();
         }
+        retryWhen.reset(NetBaseParam.RETRYWHEN_COUNT, NetBaseParam.RETRYWHEN_TIME);
         observable
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
