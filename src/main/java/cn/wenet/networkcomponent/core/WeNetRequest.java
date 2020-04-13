@@ -1,11 +1,5 @@
 package cn.wenet.networkcomponent.core;
 
-
-import android.app.Dialog;
-import android.content.Context;
-
-import androidx.fragment.app.Fragment;
-
 import java.util.Map;
 
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;

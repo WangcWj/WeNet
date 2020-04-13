@@ -17,8 +17,6 @@ import okhttp3.HttpUrl;
  */
 public class WeNetWork {
 
-    private Context mApplicationContext;
-
     private WeNetWork() {
 
     }
