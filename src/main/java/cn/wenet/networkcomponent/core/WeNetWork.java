@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 
+import java.io.File;
 import java.util.Map;
 
 import cn.wenet.networkcomponent.base.NetBaseParam;
@@ -83,6 +84,10 @@ public class WeNetWork {
 
     public static Map<String, Object> getBaseParams() {
         return Control.getInstance().getBaseParams();
+    }
+
+    public static File getCacheFile() {
+        return Control.getInstance().getCacheFile();
     }
 
     /**

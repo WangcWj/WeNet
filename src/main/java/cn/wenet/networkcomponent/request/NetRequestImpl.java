@@ -76,6 +76,8 @@ public class NetRequestImpl implements WeNetRequest {
 
     private boolean isForm = true;
 
+    private boolean mUseCache = false;
+
     public NetRequestImpl(Control netControl) {
         this.netControl = netControl;
         mParams = new HashMap<>();
@@ -110,6 +112,16 @@ public class NetRequestImpl implements WeNetRequest {
     @Override
     public boolean isForm() {
         return isForm;
+    }
+
+    @Override
+    public void autoShowProgress() {
+
+    }
+
+    @Override
+    public void cacheMode(boolean useCache) {
+        this.mUseCache = useCache;
     }
 
     @Override
@@ -197,6 +209,10 @@ public class NetRequestImpl implements WeNetRequest {
         }
     }
 
+    public boolean isUseCache() {
+        return mUseCache;
+    }
+
     public void setNetObservable(WeNetResultObservable netObservable) {
         mNetObservable = netObservable;
     }
@@ -218,7 +234,7 @@ public class NetRequestImpl implements WeNetRequest {
 
     private <T> void execute(Observable observable, WeNetworkCallBack<T> callback) {
         //要先执行
-        netControl.execute(mPageLifeManager, observable, callback);
+        netControl.execute(this,mPageLifeManager, observable, callback);
     }
 
 }

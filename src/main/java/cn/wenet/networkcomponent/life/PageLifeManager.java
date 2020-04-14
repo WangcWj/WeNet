@@ -23,6 +23,7 @@ public class PageLifeManager implements WeNetLifecycleControl {
     private CompositeDisposable mDisposable;
     private final Set<ComponentLifeCircle> mLifeCircles = Collections.newSetFromMap(new WeakHashMap<ComponentLifeCircle, Boolean>());
 
+
     public void register(ComponentLifeCircle lifeCircle) {
         mLifeCircles.add(lifeCircle);
     }

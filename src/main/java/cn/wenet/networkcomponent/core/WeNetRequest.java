@@ -76,6 +76,20 @@ public interface WeNetRequest extends WeNetResult {
     boolean isForm();
 
     /**
+     * 自动展示进度框。
+     *
+     * @return
+     */
+    void autoShowProgress();
+
+    /**
+     * 接口缓存的模式。
+     *
+     * @return
+     */
+    void cacheMode(boolean useCache);
+
+    /**
      * 直接执行Observable对象，跟Retrofit的基本使用是一样的。
      *
      * @param observable

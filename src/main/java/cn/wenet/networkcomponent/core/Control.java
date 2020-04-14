@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import java.util.Map;
 
 import cn.wenet.networkcomponent.base.BaseControl;
+import cn.wenet.networkcomponent.cache.WeNetCache;
 import cn.wenet.networkcomponent.life.ComponentLifeCircle;
 import cn.wenet.networkcomponent.base.NetBaseObserver;
 import cn.wenet.networkcomponent.life.PageLifeManager;
@@ -154,8 +155,8 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      * @param callback
      * @param observable
      */
-    public void execute(PageLifeManager lifeManager, Observable observable, WeNetworkCallBack callback) {
-        NetBaseObserver baseObserver = getBaseObserve(callback);
+    public void execute(NetRequestImpl imp, PageLifeManager lifeManager, Observable observable, WeNetworkCallBack callback) {
+        NetBaseObserver baseObserver = getBaseObserve(imp,callback);
         baseObserver.setLifeCircleManager(lifeManager);
         subscribe(observable, baseObserver);
     }

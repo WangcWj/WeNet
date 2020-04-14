@@ -3,10 +3,12 @@ package cn.wenet.networkcomponent.base;
 
 import android.content.Context;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import cn.wenet.networkcomponent.cache.WeNetCache;
 import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
@@ -93,9 +95,15 @@ public class BaseControl {
      * @param netCallBack
      * @return
      */
-    public NetBaseObserver getBaseObserve(WeNetworkCallBack netCallBack) {
+    public NetBaseObserver getBaseObserve(NetRequestImpl imp, WeNetworkCallBack netCallBack) {
         NetBaseObserver observer = new NetBaseObserver();
-        observer.setNetCallBack(netCallBack);
+        if (imp.isUseCache()) {
+            WeNetCache cacheCallback = new WeNetCache();
+            cacheCallback.attach(imp, netCallBack);
+            observer.setNetCallBack(cacheCallback);
+        } else {
+            observer.setNetCallBack(netCallBack);
+        }
         return observer;
     }
 
@@ -184,4 +192,15 @@ public class BaseControl {
         }
     }
 
+    public File getCacheFile() {
+        if(null != mApplicationContext){
+            File cacheDir = mApplicationContext.getExternalCacheDir();
+            if(null != cacheDir) {
+                String path = cacheDir.getAbsolutePath()+File.separator+"WeNet";
+                return new File(path);
+            }
+
+        }
+        return null;
+    }
 }
