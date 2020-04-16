@@ -1,8 +1,11 @@
 package cn.wenet.networkcomponent.okhttp.intercepter;
 
 
+import java.util.HashMap;
+import java.util.Map;
 
 import cn.wenet.networkcomponent.request.InnerRequestProvider;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 import okhttp3.Interceptor;
 
 /**
@@ -12,11 +15,16 @@ import okhttp3.Interceptor;
 
 public abstract class BaseInterceptor implements Interceptor {
 
-    protected InnerRequestProvider mRequestProvider;
+    protected Map<String, NetRequestImpl> mPatams;
+
+    public void copyRequestParams(Map<String, NetRequestImpl> params) {
+        if (mPatams == null) {
+            mPatams = new HashMap<>();
+        }
+        mPatams.putAll(params);
+    }
 
     public abstract boolean isNetInterceptor();
 
-    public void setRequestProvider(InnerRequestProvider mRequestProvider) {
-        this.mRequestProvider = mRequestProvider;
-    }
+
 }

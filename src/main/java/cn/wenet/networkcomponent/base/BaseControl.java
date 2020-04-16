@@ -58,6 +58,7 @@ public class BaseControl {
     }
 
     public void addRequestParams(String url, NetRequestImpl request) {
+        
         if (null != mNetOkHttp) {
            
         }
