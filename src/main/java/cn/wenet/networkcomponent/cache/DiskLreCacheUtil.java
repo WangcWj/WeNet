@@ -24,11 +24,11 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 
 /** Junk drawer of utility methods. */
-public final class Util {
+public final class DiskLreCacheUtil {
   static final Charset US_ASCII = Charset.forName("US-ASCII");
   static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  private Util() {
+  private DiskLreCacheUtil() {
   }
 
   static String readFully(Reader reader) throws IOException {

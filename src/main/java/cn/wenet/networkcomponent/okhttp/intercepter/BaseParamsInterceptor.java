@@ -30,25 +30,6 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
     private final String POST = "POST";
     private final String GET = "GET";
 
-    private Map<String, NetRequestImpl> mPatams;
-
-    public void addRequest(String url, NetRequestImpl request) {
-        if (null == mPatams) {
-            mPatams = new HashMap<>(20);
-        }
-        mPatams.put(url, request);
-    }
-
-    public void removeRequest(String url) {
-        if (null != mPatams) {
-            mPatams.remove(url);
-        }
-    }
-
-    public Map<String, NetRequestImpl> getParams() {
-        return mPatams;
-    }
-
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request oriRequest = chain.request();

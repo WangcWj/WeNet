@@ -30,17 +30,9 @@ public class WeNetCache extends WeNetworkCallBack {
         WeDebug.e("Cache  Url is  ", url);
     }
 
-    private void saveData(String json) {
-        DisLruCacheUtils.writer(mUrl, json);
-    }
-
     @Override
     public void onSuccess(Object obj) {
-        if (TextUtils.isEmpty(mUrl) || !(obj instanceof String)) {
-            return;
-        }
-        WeDebug.e("Cache  onSuccess is  " + obj);
-        saveData((String) obj);
+
     }
 
     @Override

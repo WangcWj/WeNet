@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import cn.wenet.networkcomponent.cache.DiskLruCache;
-import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.core.WeNetWork;
 import cn.wenet.networkcomponent.debug.WeDebug;
 

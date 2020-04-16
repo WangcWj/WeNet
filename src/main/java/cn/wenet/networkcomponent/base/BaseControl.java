@@ -48,7 +48,6 @@ public class BaseControl {
     public Map<String, Object> mBaseParams = new HashMap<>();
 
     protected Map<String, HttpUrl> mBaseUrls = new HashMap<>();
-    private BaseParamsInterceptor paramsInterceptor;
 
     protected Context getContext() {
         return mApplicationContext;
@@ -59,8 +58,8 @@ public class BaseControl {
     }
 
     public void addRequestParams(String url, NetRequestImpl request) {
-        if (null != paramsInterceptor) {
-            paramsInterceptor.addRequest(url, request);
+        if (null != mNetOkHttp) {
+           
         }
     }
 
@@ -157,12 +156,9 @@ public class BaseControl {
         mApplicationContext = context;
         mNetOkHttp = NetOkHttp.getInstance();
         mNetRetrofit = NetRetrofit.getInstance();
-        paramsInterceptor = (BaseParamsInterceptor) NetInterceptorFactory.baseParamsIntercepter();
-        BaseInterceptor interceptor = NetInterceptorFactory.baseUrlInterceptor();
-        ((BaseUrlInterceptor) interceptor).setParamsInterceptor(paramsInterceptor);
-        mNetOkHttp.addBaseInterceptor(interceptor);
+        mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.baseUrlInterceptor());
         mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.logInterceptor());
-        mNetOkHttp.addBaseInterceptor(paramsInterceptor);
+        mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.baseParamsIntercepter());
         mHaveInit = true;
     }
 

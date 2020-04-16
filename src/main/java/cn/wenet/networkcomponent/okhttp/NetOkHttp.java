@@ -79,6 +79,10 @@ public class NetOkHttp {
         }
     }
 
+    public ArrayList<Interceptor> getBaseInterceptors() {
+        return mBaseInterceptors;
+    }
+
     private void emptyBuild() {
         if (null == builder) {
             throw new NullPointerException("NetOkHttp.mOkHttpClient.Builder  is null !");
