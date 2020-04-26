@@ -4,7 +4,6 @@ package cn.wenet.networkcomponent.okhttp.intercepter;
 import android.text.TextUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -33,11 +32,11 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request oriRequest = chain.request();
-        if (null == mPatams || mPatams.size() <= 0) {
+        if (null == mNetControl || mNetControl.getRequests().size() <= 0) {
             return chain.proceed(oriRequest);
         }
         String url = oriRequest.url().toString();
-        NetRequestImpl request = mPatams.get(url);
+        NetRequestImpl request = mNetControl.getRequests().get(url);
         if (null == request || null == request.getParams()) {
             return chain.proceed(oriRequest);
         }

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.core.WeNetWork;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.utils.ThreadUtils;
 import io.reactivex.disposables.CompositeDisposable;

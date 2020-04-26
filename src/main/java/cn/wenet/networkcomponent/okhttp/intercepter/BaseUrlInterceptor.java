@@ -31,14 +31,9 @@ import okhttp3.Response;
 public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
 
     private WeUrlParse urlParse;
-    private BaseParamsInterceptor paramsInterceptor;
 
     public BaseUrlInterceptor() {
         urlParse = new WeUrlParse();
-    }
-
-    public void setParamsInterceptor(BaseParamsInterceptor paramsInterceptor) {
-        this.paramsInterceptor = paramsInterceptor;
     }
 
     @Override
@@ -58,15 +53,16 @@ public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
                 newBuilder.removeHeader(Control.GLOBAL_HEADER);
                 Request newRequest = newBuilder.url(newHttpUrl).build();
                 String u = request.url().toString();
-                Map<String, NetRequestImpl> params = null;
-                if (null != paramsInterceptor) {
-                    params = paramsInterceptor.getParams();
+
+                //TODO
+                if (null != mNetControl && mNetControl.getRequests().size() > 0) {
+                    Map<String, NetRequestImpl> params = mNetControl.getRequests();
                     if (null != params) {
                         if (params.containsKey(u)) {
                             NetRequestImpl netRequestImpl = params.get(u);
-                            paramsInterceptor.removeRequest(u);
+                            params.remove(u);
                             String url = newHttpUrl.toString();
-                            paramsInterceptor.addRequest(url, netRequestImpl);
+                            params.put(url, netRequestImpl);
                         }
                     }
                 }

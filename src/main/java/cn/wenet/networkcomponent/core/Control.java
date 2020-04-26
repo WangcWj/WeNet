@@ -2,13 +2,13 @@ package cn.wenet.networkcomponent.core;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.fragment.app.Fragment;
 
 import java.util.Map;
 
 import cn.wenet.networkcomponent.base.BaseControl;
-import cn.wenet.networkcomponent.cache.WeNetCache;
 import cn.wenet.networkcomponent.life.ComponentLifeCircle;
 import cn.wenet.networkcomponent.base.NetBaseObserver;
 import cn.wenet.networkcomponent.life.PageLifeManager;

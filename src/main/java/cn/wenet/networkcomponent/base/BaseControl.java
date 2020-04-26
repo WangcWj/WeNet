@@ -2,14 +2,18 @@ package cn.wenet.networkcomponent.base;
 
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import cn.wenet.networkcomponent.cache.WeNetCache;
 import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.core.WeNetRequest;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseParamsInterceptor;
@@ -25,6 +29,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import retrofit2.Retrofit;
 
 /**
@@ -39,7 +44,7 @@ public class BaseControl {
 
     private NetRetryWhen retryWhen;
 
-    protected volatile boolean mHaveInit = false;
+    private volatile boolean mHaveInit = false;
 
     protected NetOkHttp mNetOkHttp;
 
@@ -49,19 +54,30 @@ public class BaseControl {
 
     protected Map<String, HttpUrl> mBaseUrls = new HashMap<>();
 
+    protected Map<String, NetRequestImpl> mRequests = new HashMap<>();
+
     protected Context getContext() {
         return mApplicationContext;
     }
 
-    public Map<String, Object> getBaseParams() {
-        return mBaseParams;
+    public void addRequestParams(NetRequestImpl request) {
+        if (null != request) {
+            mRequests.put(request.getUrl(), request);
+        }
     }
 
-    public void addRequestParams(String url, NetRequestImpl request) {
-        
-        if (null != mNetOkHttp) {
-           
+    public Map<String, NetRequestImpl> getRequests() {
+        return mRequests;
+    }
+
+    public void removeRequest(String url) {
+        if (!TextUtils.isEmpty(url)) {
+            mRequests.remove(url);
         }
+    }
+
+    public Map<String, Object> getBaseParams() {
+        return mBaseParams;
     }
 
     /**
@@ -97,6 +113,9 @@ public class BaseControl {
      */
     public NetBaseObserver getBaseObserve(NetRequestImpl imp, WeNetworkCallBack netCallBack) {
         NetBaseObserver observer = new NetBaseObserver();
+        observer.setCurrentUrl(imp.getUrl());
+        observer.setNetControl(this);
+        this.addRequestParams(imp);
         if (imp.isUseCache()) {
             WeNetCache cacheCallback = new WeNetCache();
             cacheCallback.attach(imp, netCallBack);
@@ -155,7 +174,7 @@ public class BaseControl {
             return;
         }
         mApplicationContext = context;
-        mNetOkHttp = NetOkHttp.getInstance();
+        mNetOkHttp = NetOkHttp.getInstance(this);
         mNetRetrofit = NetRetrofit.getInstance();
         mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.baseUrlInterceptor());
         mNetOkHttp.addBaseInterceptor(NetInterceptorFactory.logInterceptor());
@@ -163,9 +182,6 @@ public class BaseControl {
         mHaveInit = true;
     }
 
-    public BaseInterceptor getParamsInterceptor() {
-        return paramsInterceptor;
-    }
 
     protected void transformationUrl(String flag, String url) {
         String[] split = flag.split(":");
@@ -190,10 +206,10 @@ public class BaseControl {
     }
 
     public File getCacheFile() {
-        if(null != mApplicationContext){
+        if (null != mApplicationContext) {
             File cacheDir = mApplicationContext.getExternalCacheDir();
-            if(null != cacheDir) {
-                String path = cacheDir.getAbsolutePath()+File.separator+"WeNet";
+            if (null != cacheDir) {
+                String path = cacheDir.getAbsolutePath() + File.separator + "WeNet";
                 return new File(path);
             }
 

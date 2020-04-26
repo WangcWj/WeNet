@@ -9,7 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSocketFactory;
 
+import cn.wenet.networkcomponent.base.BaseControl;
 import cn.wenet.networkcomponent.base.NetBaseParam;
+import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.okhttp.https.SSLSocketClient;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
@@ -30,11 +32,14 @@ public class NetOkHttp {
 
     private OkHttpClient.Builder builder;
 
-    public static NetOkHttp getInstance() {
-        return new NetOkHttp();
+    private BaseControl mNetControl;
+
+    public static NetOkHttp getInstance(BaseControl control) {
+        return new NetOkHttp(control);
     }
 
-    private NetOkHttp() {
+    private NetOkHttp(BaseControl control) {
+        this.mNetControl = control;
         init();
     }
 
@@ -43,7 +48,7 @@ public class NetOkHttp {
      */
     private volatile boolean haveChange = false;
 
-    private ArrayList<Interceptor> mBaseInterceptors = new ArrayList<>();
+    private ArrayList<BaseInterceptor> mBaseInterceptors = new ArrayList<>();
 
     public OkHttpClient getOkHttpClient() {
         emptyBuild();
@@ -79,7 +84,7 @@ public class NetOkHttp {
         }
     }
 
-    public ArrayList<Interceptor> getBaseInterceptors() {
+    public ArrayList<BaseInterceptor> getBaseInterceptors() {
         return mBaseInterceptors;
     }
 

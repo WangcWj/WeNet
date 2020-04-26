@@ -3,6 +3,7 @@ package cn.wenet.networkcomponent.base;
 
 import androidx.annotation.Nullable;
 
+import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.life.ComponentLifeCircle;
 import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.exception.NetException;
@@ -20,10 +21,19 @@ import io.reactivex.disposables.Disposable;
 
 public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
-
+    private String mCurrentUrl;
+    private BaseControl mNetControl;
     private WeNetworkCallBack netCallBack;
     private PageLifeManager lifeCircleManager;
     private Disposable mCurrentDisposable;
+
+    public void setNetControl(BaseControl mNetControl) {
+        this.mNetControl = mNetControl;
+    }
+
+    public void setCurrentUrl(String mCurrentUrl) {
+        this.mCurrentUrl = mCurrentUrl;
+    }
 
     public void setNetCallBack(WeNetworkCallBack netCallBack) {
         this.netCallBack = netCallBack;
@@ -39,6 +49,10 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
     private void requestFinish() {
         if (null != lifeCircleManager) {
             lifeCircleManager.unRegister(this);
+            lifeCircleManager.requestEnd(mCurrentDisposable);
+        }
+        if (null != mNetControl) {
+            mNetControl.removeRequest(mCurrentUrl);
         }
         clearData();
     }
@@ -51,9 +65,6 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
     @Override
     public void onError(Throwable e) {
-        if (null != lifeCircleManager) {
-            lifeCircleManager.requestEnd(mCurrentDisposable);
-        }
         NetException netException = new NetException(e);
         netCallBack.onError(netException);
         requestFinish();
@@ -99,9 +110,6 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (null != lifeCircleManager) {
-                lifeCircleManager.requestEnd(mCurrentDisposable);
-            }
             requestFinish();
         }
     }
