@@ -3,6 +3,7 @@ package cn.wenet.networkcomponent.retrofit;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.retrofit.convert.ToStringConverterFactory;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetCallAdapterFactory;
+import cn.wenet.networkcomponent.retrofit.convert.WeNetGsonConverterFactory;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;

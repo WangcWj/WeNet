@@ -36,15 +36,15 @@ public class WeNetResultObservable<T> extends Observable<T> implements WeNetResu
         mCurrentRequest = request;
         mNetRequest = WeNetWork.request();
         ((NetRequestImpl)mNetRequest).setNetObservable(this);
-    }
-
-    @Override
-    protected void subscribeActual(Observer<? super T> observer) {
         if (null != mCurrentRequest && null != mNetRequest) {
             //要处理多BaseUrl的情况
             String url = mCurrentRequest.url().toString();
             ((NetRequestImpl)mNetRequest).attachUrl(url);
         }
+    }
+
+    @Override
+    protected void subscribeActual(Observer<? super T> observer) {
         upstream.subscribe(new WeNetResultObservable.BodyObserver<T>(observer));
     }
 

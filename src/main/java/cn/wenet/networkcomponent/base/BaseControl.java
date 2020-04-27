@@ -2,9 +2,6 @@ package cn.wenet.networkcomponent.base;
 
 
 import android.content.Context;
-import android.text.TextUtils;
-import android.util.Log;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,11 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 import cn.wenet.networkcomponent.cache.WeNetCache;
 import cn.wenet.networkcomponent.core.Control;
-import cn.wenet.networkcomponent.core.WeNetRequest;
 import cn.wenet.networkcomponent.debug.WeDebug;
+import cn.wenet.networkcomponent.life.RequestLifeCircle;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
-import cn.wenet.networkcomponent.okhttp.intercepter.BaseParamsInterceptor;
-import cn.wenet.networkcomponent.okhttp.intercepter.BaseUrlInterceptor;
 import cn.wenet.networkcomponent.okhttp.intercepter.NetInterceptorFactory;
 import cn.wenet.networkcomponent.okhttp.NetOkHttp;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
@@ -29,7 +24,6 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
 import retrofit2.Retrofit;
 
 /**
@@ -54,30 +48,26 @@ public class BaseControl {
 
     protected Map<String, HttpUrl> mBaseUrls = new HashMap<>();
 
-    protected Map<String, NetRequestImpl> mRequests = new HashMap<>();
-
     protected Context getContext() {
         return mApplicationContext;
     }
 
-    public void addRequestParams(NetRequestImpl request) {
-        if (null != request) {
-            mRequests.put(request.getUrl(), request);
-        }
-    }
-
-    public Map<String, NetRequestImpl> getRequests() {
-        return mRequests;
-    }
-
-    public void removeRequest(String url) {
-        if (!TextUtils.isEmpty(url)) {
-            mRequests.remove(url);
-        }
-    }
-
     public Map<String, Object> getBaseParams() {
         return mBaseParams;
+    }
+
+    /**
+     * 拦截器跟{@link cn.wenet.networkcomponent.life.WeNetLifeCircleManager}关联起来。
+     *
+     * @param lifeCircle
+     */
+    protected void attachInterceptor(RequestLifeCircle lifeCircle) {
+        if (null != mNetOkHttp) {
+            ArrayList<BaseInterceptor> baseInterceptors = mNetOkHttp.getBaseInterceptors();
+            for (BaseInterceptor interceptor : baseInterceptors) {
+                interceptor.attachRequest(lifeCircle);
+            }
+        }
     }
 
     /**
@@ -113,9 +103,7 @@ public class BaseControl {
      */
     public NetBaseObserver getBaseObserve(NetRequestImpl imp, WeNetworkCallBack netCallBack) {
         NetBaseObserver observer = new NetBaseObserver();
-        observer.setCurrentUrl(imp.getUrl());
-        observer.setNetControl(this);
-        this.addRequestParams(imp);
+        observer.setRequest(imp);
         if (imp.isUseCache()) {
             WeNetCache cacheCallback = new WeNetCache();
             cacheCallback.attach(imp, netCallBack);

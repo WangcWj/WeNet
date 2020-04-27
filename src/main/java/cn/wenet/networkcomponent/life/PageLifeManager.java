@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import cn.wenet.networkcomponent.core.Control;
-import cn.wenet.networkcomponent.core.WeNetWork;
+import cn.wenet.networkcomponent.base.NetBaseParam;
 import cn.wenet.networkcomponent.debug.WeDebug;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 import cn.wenet.networkcomponent.utils.ThreadUtils;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
+import retrofit2.http.HTTP;
+
 
 /**
  * Created to : 管理一个应用界面中的网络请求，界面载体只能是Activity、Fragment。
@@ -21,44 +22,64 @@ import io.reactivex.disposables.Disposable;
  */
 public class PageLifeManager implements WeNetLifecycleControl {
 
-
+    private RequestLifeCircle mManagerRequest;
     private CompositeDisposable mDisposable;
     private final Set<ComponentLifeCircle> mLifeCircles = Collections.newSetFromMap(new WeakHashMap<ComponentLifeCircle, Boolean>());
 
+    PageLifeManager(RequestLifeCircle managerRequest) {
+        this.mManagerRequest = managerRequest;
+    }
 
+    private void addRequestParams(NetRequestImpl request) {
+        mManagerRequest.addRequestParams(request);
+    }
+
+    private void removeRequest(String url) {
+        mManagerRequest.removeRequest(url);
+    }
+
+    @Override
     public void register(ComponentLifeCircle lifeCircle) {
         mLifeCircles.add(lifeCircle);
     }
 
+    @Override
     public void unRegister(ComponentLifeCircle lifeCircle) {
         mLifeCircles.remove(lifeCircle);
     }
 
     @Override
-    public void requestStart(Disposable disposable) {
-        if (null == disposable) {
+    public void requestStart(NetRequestImpl request) {
+        if (null == request) {
             return;
         }
         if (null == mDisposable) {
             mDisposable = new CompositeDisposable();
         }
-        WeDebug.e("PageLifeManager requestStart" + mDisposable.size());
-        mDisposable.add(disposable);
+        addRequestParams(request);
+        if (null != request.getCurrentDisposable()) {
+            WeDebug.d("PageLifeManager requestStart" + mDisposable.size());
+            mDisposable.add(request.getCurrentDisposable());
+        }
     }
 
     @Override
-    public void requestEnd(Disposable disposable) {
-        if (null != disposable && null != mDisposable) {
-            WeDebug.e("PageLifeManager requestEnd" + mDisposable.size());
-            mDisposable.remove(disposable);
+    public void requestEnd(NetRequestImpl request) {
+        if (null == request) {
+            return;
+        }
+        removeRequest(request.getUrl());
+        if (null != request.getCurrentDisposable() && null != mDisposable) {
+            WeDebug.d("PageLifeManager requestEnd" + mDisposable.size());
+            mDisposable.remove(request.getCurrentDisposable());
         }
     }
 
     @Override
     public void pageDestroy() {
         //取消掉未结束的网络请求，比如说取消掉接口超时时的网络重试机制。
-        if (null != mDisposable && !mDisposable.isDisposed()) {
-            WeDebug.e("PageLifeManager pageDestroy 有网络没取消掉 " + mDisposable.size());
+        if (null != mDisposable && !mDisposable.isDisposed() && mDisposable.size() > 0) {
+            WeDebug.d("PageLifeManager pageDestroy 有网络没取消掉 " + mDisposable.size());
             mDisposable.dispose();
         }
         //NetBaseObserver的生命周期的控制。
@@ -67,7 +88,7 @@ public class PageLifeManager implements WeNetLifecycleControl {
         }
         mLifeCircles.clear();
         mDisposable = null;
-        WeDebug.e("PageLifeManager pageDestroy");
+        WeDebug.d("PageLifeManager pageDestroy");
     }
 
 

@@ -27,6 +27,22 @@ public class WeDebug {
         }
     }
 
+    public static void logD(String... message) {
+        logD(TextUtils.concat(message).toString());
+    }
+
+    public static void logD(String message) {
+        if (DEBUG) {
+            Log.d(TAG, TextUtils.concat("WeNet: ", message).toString() + "\n");
+        }
+    }
+
+    public static void d(String message) {
+        if (DEBUG) {
+            Log.d(TAG, TextUtils.concat("WeNet: ", message).toString() + "\n");
+        }
+    }
+
     public static String getNullPointerErrorInfo(String method, String fileInfo) {
         return TextUtils.concat("Control.", method, ": ", fileInfo, " cannot be null!").toString();
     }

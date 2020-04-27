@@ -17,6 +17,7 @@ import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;
 import cn.wenet.networkcomponent.utils.GsonUtils;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * @author WANG
@@ -65,6 +66,8 @@ public class NetRequestImpl implements WeNetRequest {
     private PageLifeManager mPageLifeManager;
 
     private Observable mObservable;
+
+    private Disposable mCurrentDisposable;
 
     private Map<String, Object> mParams;
 
@@ -209,6 +212,19 @@ public class NetRequestImpl implements WeNetRequest {
         }
     }
 
+    @Override
+    public Disposable getCurrentDisposable() {
+        return mCurrentDisposable;
+    }
+
+    public void updateUrl(String url) {
+       mUrl = url;
+    }
+
+    public void setCurrentDisposable(Disposable mCurrentDisposable) {
+        this.mCurrentDisposable = mCurrentDisposable;
+    }
+
     public boolean isUseCache() {
         return mUseCache;
     }
@@ -219,7 +235,6 @@ public class NetRequestImpl implements WeNetRequest {
 
     public void attachUrl(String url) {
         mUrl = url;
-        netControl.addRequestParams(url, this);
     }
 
     public String getBodyJson() {
@@ -237,4 +252,11 @@ public class NetRequestImpl implements WeNetRequest {
         netControl.execute(this,mPageLifeManager, observable, callback);
     }
 
+
+    @Override
+    public String toString() {
+        return "NetRequestImpl{" +
+                "mUrl='" + mUrl + '\'' +
+                '}';
+    }
 }

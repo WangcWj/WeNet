@@ -18,8 +18,8 @@ public class RequestManagerFragment extends Fragment {
 
     private PageLifeManager pageLifeManager;
 
-    public RequestManagerFragment() {
-        pageLifeManager = new PageLifeManager();
+    public RequestManagerFragment(WeNetLifeCircleManager manager) {
+        pageLifeManager = new PageLifeManager(manager);
     }
 
     PageLifeManager getPageLifeManager() {
@@ -32,13 +32,13 @@ public class RequestManagerFragment extends Fragment {
             pageLifeManager.pageDestroy();
         }
         super.onDestroy();
-        WeDebug.e("RequestManagerFragment.onDestroy");
+        WeDebug.d("RequestManagerFragment.onDestroy");
         pageLifeManager = null;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        WeDebug.e("RequestManagerFragment.onCreate");
+        WeDebug.d("RequestManagerFragment.onCreate");
     }
 }

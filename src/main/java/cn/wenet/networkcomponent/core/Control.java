@@ -2,7 +2,6 @@ package cn.wenet.networkcomponent.core;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.fragment.app.Fragment;
 
@@ -110,6 +109,11 @@ public class Control extends BaseControl implements ComponentLifeCircle {
         return new NetRequestImpl(this);
     }
 
+    public PageLifeManager bindApplication() {
+        initLifeManager();
+        return mLifeManager.bindApplication();
+    }
+
     /**
      * 绑定Activity的生命周期，加入的是Fragment。
      *
@@ -117,9 +121,7 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      * @return
      */
     public PageLifeManager bindContext(Context context) {
-        if (mLifeManager == null) {
-            mLifeManager = new WeNetLifeCircleManager();
-        }
+        initLifeManager();
         return mLifeManager.bindContext(context);
     }
 
@@ -130,9 +132,7 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      * @return
      */
     public PageLifeManager bindFragment(Fragment fragment) {
-        if (mLifeManager == null) {
-            mLifeManager = new WeNetLifeCircleManager();
-        }
+        initLifeManager();
         return mLifeManager.bindFragment(fragment);
     }
 
@@ -143,10 +143,15 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      * @return
      */
     public PageLifeManager bindDialog(Dialog dialog) {
+        initLifeManager();
+        return mLifeManager.bindDialog(dialog);
+    }
+
+    private void initLifeManager(){
         if (mLifeManager == null) {
             mLifeManager = new WeNetLifeCircleManager();
+            attachInterceptor(mLifeManager);
         }
-        return mLifeManager.bindDialog(dialog);
     }
 
     /**
@@ -156,6 +161,9 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      * @param observable
      */
     public void execute(NetRequestImpl imp, PageLifeManager lifeManager, Observable observable, WeNetworkCallBack callback) {
+        if(null == lifeManager){
+            lifeManager = bindApplication();
+        }
         NetBaseObserver baseObserver = getBaseObserve(imp,callback);
         baseObserver.setLifeCircleManager(lifeManager);
         subscribe(observable, baseObserver);
@@ -169,6 +177,5 @@ public class Control extends BaseControl implements ComponentLifeCircle {
     @Override
     public void onDestroy() {
         instance = null;
-
     }
 }

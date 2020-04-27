@@ -9,6 +9,7 @@ import java.util.Map;
 import cn.wenet.networkcomponent.core.Control;
 import cn.wenet.networkcomponent.core.WeNetWork;
 import cn.wenet.networkcomponent.debug.WeDebug;
+import cn.wenet.networkcomponent.life.WeNetLifeCircleManager;
 import cn.wenet.networkcomponent.okhttp.parse.WeUrlParse;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
 import okhttp3.Headers;
@@ -52,17 +53,20 @@ public class BaseUrlInterceptor extends BaseInterceptor implements Interceptor {
                 Request.Builder newBuilder = request.newBuilder();
                 newBuilder.removeHeader(Control.GLOBAL_HEADER);
                 Request newRequest = newBuilder.url(newHttpUrl).build();
+                //这个代码解决的是当BaseUrl需要替换的时候，需要通过新的Url取基础参数。
                 String u = request.url().toString();
-
-                //TODO
-                if (null != mNetControl && mNetControl.getRequests().size() > 0) {
-                    Map<String, NetRequestImpl> params = mNetControl.getRequests();
+                if (null != mRequests && mRequests.getRequests().size() > 0) {
+                    Map<String, NetRequestImpl> params = mRequests.getRequests();
                     if (null != params) {
-                        if (params.containsKey(u)) {
-                            NetRequestImpl netRequestImpl = params.get(u);
-                            params.remove(u);
-                            String url = newHttpUrl.toString();
-                            params.put(url, netRequestImpl);
+                        String key = WeNetLifeCircleManager.mergeHttp(u);
+                        if (params.containsKey(key)) {
+                            NetRequestImpl netRequestImpl = params.get(key);
+                            if (null != netRequestImpl) {
+                                params.remove(key);
+                                String url = newHttpUrl.toString();
+                                netRequestImpl.updateUrl(url);
+                                params.put(WeNetLifeCircleManager.mergeHttp(url), netRequestImpl);
+                            }
                         }
                     }
                 }

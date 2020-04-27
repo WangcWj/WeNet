@@ -13,9 +13,9 @@ import android.view.View;
 public class RequestManagerView extends View {
     private PageLifeManager pageLifeManager;
 
-    public RequestManagerView(Context context) {
+    public RequestManagerView(Context context,WeNetLifeCircleManager manager) {
         super(context);
-        pageLifeManager = new PageLifeManager();
+        pageLifeManager = new PageLifeManager(manager);
     }
 
     PageLifeManager getPageLifeManager() {

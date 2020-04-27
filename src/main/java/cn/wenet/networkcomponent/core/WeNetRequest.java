@@ -5,6 +5,7 @@ import java.util.Map;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Created to :
@@ -105,5 +106,7 @@ public interface WeNetRequest extends WeNetResult {
      * @param <T>
      */
     <T> void execute(WeNetworkCallBack<T> callback);
+
+    Disposable getCurrentDisposable();
 
 }

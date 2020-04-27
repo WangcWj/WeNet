@@ -6,6 +6,8 @@ package cn.wenet.networkcomponent.base;
 
 public class NetBaseParam {
 
+    public static final String HTTP = "http://";
+    public static final String HTTPS = "https://";
     public final static int CONNECTION_TIME = 10;
     public final static int READ_TIMEOUT  = 10;
     public final static int WRITER_TIMEOUT  = 10;

@@ -1,4 +1,4 @@
-package cn.wenet.networkcomponent.exception;
+package cn.wenet.networkcomponent.debug.exception;
 
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializer;

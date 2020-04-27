@@ -1,13 +1,16 @@
 package cn.wenet.networkcomponent.base;
 
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 
-import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.life.ComponentLifeCircle;
 import cn.wenet.networkcomponent.life.PageLifeManager;
-import cn.wenet.networkcomponent.exception.NetException;
+import cn.wenet.networkcomponent.debug.exception.NetException;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
@@ -21,46 +24,28 @@ import io.reactivex.disposables.Disposable;
 
 public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
-    private String mCurrentUrl;
-    private BaseControl mNetControl;
+    private NetRequestImpl mCurrentRequest;
     private WeNetworkCallBack netCallBack;
     private PageLifeManager lifeCircleManager;
-    private Disposable mCurrentDisposable;
 
-    public void setNetControl(BaseControl mNetControl) {
-        this.mNetControl = mNetControl;
+    public void setRequest(NetRequestImpl request) {
+        this.mCurrentRequest = request;
     }
 
-    public void setCurrentUrl(String mCurrentUrl) {
-        this.mCurrentUrl = mCurrentUrl;
-    }
-
-    public void setNetCallBack(WeNetworkCallBack netCallBack) {
+    void setNetCallBack(WeNetworkCallBack netCallBack) {
         this.netCallBack = netCallBack;
     }
 
     public void setLifeCircleManager(@Nullable PageLifeManager lifeCircleManager) {
         this.lifeCircleManager = lifeCircleManager;
-        if (null != lifeCircleManager) {
-            lifeCircleManager.register(this);
-        }
     }
 
     private void requestFinish() {
         if (null != lifeCircleManager) {
             lifeCircleManager.unRegister(this);
-            lifeCircleManager.requestEnd(mCurrentDisposable);
-        }
-        if (null != mNetControl) {
-            mNetControl.removeRequest(mCurrentUrl);
+            lifeCircleManager.requestEnd(mCurrentRequest);
         }
         clearData();
-    }
-
-    private void clearData() {
-        netCallBack = null;
-        lifeCircleManager = null;
-        mCurrentDisposable = null;
     }
 
     @Override
@@ -75,11 +60,16 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
     }
 
+    /**
+     * 这个方法执行之前，mCurrentRequest中的Url还是null。
+     * @param d
+     */
     @Override
     public void onSubscribe(Disposable d) {
-        mCurrentDisposable = d;
+        mCurrentRequest.setCurrentDisposable(d);
         if (null != lifeCircleManager) {
-            lifeCircleManager.requestStart(d);
+            lifeCircleManager.register(this);
+            lifeCircleManager.requestStart(mCurrentRequest);
         }
     }
 
@@ -122,5 +112,11 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
     @Override
     public void onDestroy() {
         clearData();
+    }
+
+    private void clearData() {
+        netCallBack = null;
+        lifeCircleManager = null;
+        mCurrentRequest = null;
     }
 }

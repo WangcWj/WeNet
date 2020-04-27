@@ -1,6 +1,6 @@
 package cn.wenet.networkcomponent.life;
 
-import io.reactivex.disposables.Disposable;
+import cn.wenet.networkcomponent.request.NetRequestImpl;
 
 /**
  *
@@ -10,10 +10,14 @@ import io.reactivex.disposables.Disposable;
 
 public interface WeNetLifecycleControl {
 
-   void requestStart(Disposable disposable);
+   void requestStart(NetRequestImpl request);
 
-   void requestEnd(Disposable disposable);
+   void requestEnd(NetRequestImpl request);
 
    void pageDestroy();
+
+   void register(ComponentLifeCircle lifeCircle);
+
+   void unRegister(ComponentLifeCircle lifeCircle);
 
 }

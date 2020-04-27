@@ -36,34 +36,33 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        WeDebug.e("BaseLogInterceptor ========");
         if (WeDebug.DEBUG) {
             HttpUrl httpUrl = request.url();
 
             List<String> methods = httpUrl.encodedPathSegments();
             if (methods.size() > 0) {
-                WeDebug.e("method name  is", methods.get(0));
+                WeDebug.logD("method name  is", methods.get(0));
             }
             String url = httpUrl.toString();
             if (!TextUtils.isEmpty(url)) {
-                WeDebug.e("URL is : ", url);
+                WeDebug.logD("URL is : ", url);
             }
             String method = request.method();
             if (!TextUtils.isEmpty(method)) {
-                WeDebug.e("Method is : ", method);
+                WeDebug.logD("Method is : ", method);
             }
             RequestBody body = request.body();
             if (body != null) {
                 String readString = RequestBodyUtils.requestBodyToString(body);
                 if(!TextUtils.isEmpty(readString)) {
-                    WeDebug.e("RequestBody is : " + readString);
+                    WeDebug.logD("RequestBody is : " + readString);
                 }
             }
             if (WeDebug.LOG_REQUEST_HEADER) {
                 Headers headers = request.headers();
                 if (null != headers) {
                     String headerStr = headers.toString();
-                    WeDebug.e("Headers is :", headerStr);
+                    WeDebug.logD("Headers is :", headerStr);
                 }
             }
             Response response = chain.proceed(request);
@@ -75,7 +74,7 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
                 MediaType contentType = responseBody.contentType();
                 boolean plaintext = RequestBodyUtils.isPlaintext(buffer);
                 if (!plaintext) {
-                    WeDebug.e("请求结果不是文本，其类型是：", contentType.toString());
+                    WeDebug.logD("请求结果不是文本，其类型是：", contentType.toString());
                     return response;
                 }
                 Charset charset = UTF8;
@@ -85,7 +84,7 @@ public class BaseLogInterceptor extends BaseInterceptor implements Interceptor {
                 long contentLength = responseBody.contentLength();
                 if (0 != contentLength) {
                     String json = buffer.clone().readString(charset);
-                    WeDebug.e("Json : \n", json);
+                    WeDebug.logD("Json : \n", json);
                 }
             }
             return response;

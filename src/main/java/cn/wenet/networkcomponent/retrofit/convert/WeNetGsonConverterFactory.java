@@ -39,7 +39,7 @@ public class WeNetGsonConverterFactory extends Converter.Factory {
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
 
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-        return new XdGsonResponseBodyConverter<>(gson, adapter);
+        return new WeNetGsonResponseBodyConverter<>(gson, adapter);
     }
 
     @Override

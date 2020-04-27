@@ -40,7 +40,7 @@ public class RequestBodyUtils {
         if (isPlaintext(buffer)) {
             return buffer.readString(charset);
         } else {
-            WeDebug.e("RequestBody 内容不是文本格式！");
+            WeDebug.d("RequestBody 内容不是文本格式！");
         }
         return "";
     }

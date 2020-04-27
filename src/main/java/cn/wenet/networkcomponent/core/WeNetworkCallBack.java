@@ -1,7 +1,7 @@
 package cn.wenet.networkcomponent.core;
 
 
-import cn.wenet.networkcomponent.exception.NetException;
+import cn.wenet.networkcomponent.debug.exception.NetException;
 
 /**
  * Created to :

@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
 import cn.wenet.networkcomponent.utils.RequestBodyUtils;
 import okhttp3.FormBody;
@@ -20,6 +21,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
+ * 拼接参数。支持GET、POST。支持@Query、@Filed、@Header、@RequestBody等。
+ *
  * @author WANG
  * @date 2018/5/3
  */
@@ -32,11 +35,14 @@ public class BaseParamsInterceptor extends BaseInterceptor implements Intercepto
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request oriRequest = chain.request();
-        if (null == mNetControl || mNetControl.getRequests().size() <= 0) {
+        if (null == mRequests || mRequests.getRequests().size() <= 0) {
             return chain.proceed(oriRequest);
         }
         String url = oriRequest.url().toString();
-        NetRequestImpl request = mNetControl.getRequests().get(url);
+        if(TextUtils.isEmpty(url)){
+            return chain.proceed(oriRequest);
+        }
+        NetRequestImpl request = mRequests.getRequest(url);
         if (null == request || null == request.getParams()) {
             return chain.proceed(oriRequest);
         }

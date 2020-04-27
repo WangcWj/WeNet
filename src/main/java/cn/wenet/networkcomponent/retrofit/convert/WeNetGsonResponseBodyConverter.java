@@ -19,13 +19,13 @@ import retrofit2.Converter;
 /**
  *
  */
-public class XdGsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
+public class WeNetGsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
 
     private final Gson gson;
     private final TypeAdapter<T> adapter;
     private static final Charset UTF_8 = Charset.forName("UTF-8");
 
-    XdGsonResponseBodyConverter(Gson gson, TypeAdapter<T> adapter) {
+    WeNetGsonResponseBodyConverter(Gson gson, TypeAdapter<T> adapter) {
         this.gson = gson;
         this.adapter = adapter;
     }

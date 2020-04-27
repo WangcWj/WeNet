@@ -1,8 +1,6 @@
 package cn.wenet.networkcomponent.okhttp.intercepter;
 
-
-
-import cn.wenet.networkcomponent.core.Control;
+import cn.wenet.networkcomponent.life.RequestLifeCircle;
 import okhttp3.Interceptor;
 
 /**
@@ -12,10 +10,10 @@ import okhttp3.Interceptor;
 
 public abstract class BaseInterceptor implements Interceptor {
 
-    protected Control mNetControl;
+    protected RequestLifeCircle mRequests;
 
-    public void attachControl(Control control){
-        this.mNetControl = control;
+    public void attachRequest(RequestLifeCircle requests){
+        this.mRequests = requests;
     }
 
     public abstract boolean isNetInterceptor();
