@@ -1,5 +1,7 @@
 package cn.wenet.networkcomponent.debug.exception;
 
+import android.text.TextUtils;
+
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
@@ -39,6 +41,12 @@ public class NetException {
     }
 
     public String getMessage() {
+        if(!TextUtils.isEmpty(e.getMessage())){
+            return e.getMessage();
+        }
+        if(TextUtils.isEmpty(mMessage)){
+            mMessage = "未知错误！";
+        }
         return mMessage;
     }
 
@@ -48,6 +56,7 @@ public class NetException {
 
     public NetException(Throwable e) {
         this.e = e;
+        this.mMessage = switchError(e);
     }
 
     public NetException(int code, String message) {

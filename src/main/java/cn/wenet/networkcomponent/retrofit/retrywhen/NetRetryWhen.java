@@ -1,4 +1,4 @@
-package cn.wenet.networkcomponent.rxjava;
+package cn.wenet.networkcomponent.retrofit.retrywhen;
 
 import android.accounts.NetworkErrorException;
 
@@ -10,9 +10,11 @@ import java.util.concurrent.TimeoutException;
 import cn.wenet.networkcomponent.base.NetBaseParam;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 import io.reactivex.internal.schedulers.SingleScheduler;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * 错误重连机制,可以自定义重连的次数和下次请求发出之间的时间间隔
@@ -40,7 +42,7 @@ public class NetRetryWhen implements Function<Observable<Throwable>, ObservableS
             public ObservableSource<?> apply(@NonNull Throwable throwable) throws Exception {
                 boolean isRun = mRetryCurrent < mRetryCount;
                 if (!isRun) {
-                    return Observable.error(throwable);
+                    return Observable.error(throwable).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 }
                 boolean isNetError = throwable instanceof NetworkErrorException || throwable instanceof SocketTimeoutException;
                 boolean isConnectionError = throwable instanceof ConnectException || throwable instanceof TimeoutException;
@@ -49,7 +51,7 @@ public class NetRetryWhen implements Function<Observable<Throwable>, ObservableS
                     SingleScheduler scheduler = new SingleScheduler();
                     return Observable.timer(mRetryWhenTime, TimeUnit.MILLISECONDS, scheduler);
                 }
-                return Observable.error(throwable);
+                return Observable.error(throwable).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
             }
         });
     }

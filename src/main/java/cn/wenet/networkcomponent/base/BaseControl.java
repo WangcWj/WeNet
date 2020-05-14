@@ -18,7 +18,7 @@ import cn.wenet.networkcomponent.okhttp.NetOkHttp;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
 import cn.wenet.networkcomponent.retrofit.NetRetrofit;
-import cn.wenet.networkcomponent.rxjava.NetRetryWhen;
+import cn.wenet.networkcomponent.retrofit.retrywhen.NetRetryWhen;
 import cn.wenet.networkcomponent.utils.ThreadUtils;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
