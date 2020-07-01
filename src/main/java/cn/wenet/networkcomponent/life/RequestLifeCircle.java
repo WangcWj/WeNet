@@ -15,7 +15,7 @@ import cn.wenet.networkcomponent.request.NetRequestImpl;
 public interface RequestLifeCircle {
 
 
-    void addRequestParams(NetRequestImpl request);
+    void addRequest(NetRequestImpl request);
 
     NetRequestImpl getRequest(String url);
 

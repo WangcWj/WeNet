@@ -55,17 +55,6 @@ public class Control extends BaseControl implements ComponentLifeCircle {
         mNetOkHttp.addBaseInterceptor(baseInterceptor);
     }
 
-    public void addBaseParams(String key, Object value) {
-        checkNull("addBaseParams", "key Or value", key, value);
-        mBaseParams.put(key, value);
-    }
-
-    public void addBaseParams(Map<String, Object> params) {
-        checkNull("addBaseParams", "params", params);
-        mBaseParams.clear();
-        mBaseParams.putAll(params);
-    }
-
     public void addBaseUrl(String flag, String url) {
         checkNull("init", "baseUrl", url);
         transformationUrl(flag, url);
@@ -94,10 +83,9 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      *
      * @return
      */
-    public <T> NetRequestImpl request(Observable<T> observable) {
-        NetRequestImpl request = request();
-        request.apiMethod(observable);
-        return request;
+    public <T> WeNetRequest request() {
+        return new NetRequestImpl(this);
+
     }
 
     /**
@@ -105,8 +93,10 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      *
      * @return
      */
-    NetRequestImpl request() {
-        return new NetRequestImpl(this);
+    public <T> NetRequestImpl request(Observable<T> observable) {
+        NetRequestImpl request = new NetRequestImpl(this);
+        request.apiMethod(observable);
+        return request;
     }
 
     public PageLifeManager bindApplication() {
@@ -147,11 +137,15 @@ public class Control extends BaseControl implements ComponentLifeCircle {
         return mLifeManager.bindDialog(dialog);
     }
 
-    private void initLifeManager(){
+    private void initLifeManager() {
         if (mLifeManager == null) {
             mLifeManager = new WeNetLifeCircleManager();
             attachInterceptor(mLifeManager);
         }
+    }
+
+    public WeNetLifeCircleManager getLifeCircleManager() {
+        return mLifeManager;
     }
 
     /**
@@ -161,17 +155,12 @@ public class Control extends BaseControl implements ComponentLifeCircle {
      * @param observable
      */
     public void execute(NetRequestImpl imp, PageLifeManager lifeManager, Observable observable, WeNetworkCallBack callback) {
-        if(null == lifeManager){
+        if (null == lifeManager) {
             lifeManager = bindApplication();
         }
-        NetBaseObserver baseObserver = getBaseObserve(imp,callback);
+        NetBaseObserver baseObserver = getBaseObserve(imp, callback);
         baseObserver.setLifeCircleManager(lifeManager);
         subscribe(observable, baseObserver);
-    }
-
-    @Override
-    public void onCreate() {
-
     }
 
     @Override

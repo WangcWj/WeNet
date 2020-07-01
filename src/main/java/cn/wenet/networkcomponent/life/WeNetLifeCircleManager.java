@@ -44,11 +44,11 @@ public class WeNetLifeCircleManager implements RequestLifeCircle {
     }
 
     @Override
-    public void addRequestParams(NetRequestImpl request) {
+    public void addRequest(NetRequestImpl request) {
         if (null != request && null != request.getUrl()) {
             String key = mergeHttp(request.getUrl());
             mRequests.put(key, request);
-            Log.e("WWWWWW", "WeNetLifeCircleManager.addRequestParams." + key + " size is  " + mRequests.size());
+            WeDebug.logD("addRequestParams : key = ", key, "   size = ", String.valueOf(mRequests.size()));
         }
     }
 
@@ -72,9 +72,8 @@ public class WeNetLifeCircleManager implements RequestLifeCircle {
     public void removeRequest(String url) {
         if (!TextUtils.isEmpty(url)) {
             String key = mergeHttp(url);
-            NetRequestImpl remove = mRequests.remove(key);
-            Log.e("WWWWWW", "移除掉的 " + remove);
-            Log.e("WWWWWW", "WeNetLifeCircleManager.addRequestParams." + key + " size is  " + mRequests.size());
+            mRequests.remove(key);
+            WeDebug.logD("removeRequest : key = ", key, "   size = ", String.valueOf(mRequests.size()));
         }
     }
 
@@ -86,11 +85,11 @@ public class WeNetLifeCircleManager implements RequestLifeCircle {
     }
 
     public PageLifeManager bindFragment(Fragment fragment) {
-        if (fragment == null) {
+        if (fragment == null || null == fragment.getContext()) {
             throw new IllegalArgumentException("You cannot start a load on a null Fragment");
         } else {
             FragmentManager childFragmentManager = fragment.getChildFragmentManager();
-            return supportFragmentGet(childFragmentManager);
+            return supportFragmentGet(fragment.getContext(), childFragmentManager);
         }
     }
 
@@ -127,22 +126,23 @@ public class WeNetLifeCircleManager implements RequestLifeCircle {
         return null == managerView ? null : managerView.getPageLifeManager();
     }
 
-
     private PageLifeManager bindActivity(FragmentActivity fragmentActivity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && fragmentActivity.isDestroyed()) {
-            throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
+        WeDebug.logD("-----------bindActivity-------" + fragmentActivity.isDestroyed());
+        if (fragmentActivity.isDestroyed()) {
+//            throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
+            return null;
         }
         FragmentManager supportFragmentManager = fragmentActivity.getSupportFragmentManager();
-        return supportFragmentGet(supportFragmentManager);
+        return supportFragmentGet(fragmentActivity, supportFragmentManager);
     }
 
-    private PageLifeManager supportFragmentGet(FragmentManager fragmentManager) {
+    private PageLifeManager supportFragmentGet(Context context, FragmentManager fragmentManager) {
         RequestManagerFragment tag = (RequestManagerFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         if (null == tag) {
-            tag = new RequestManagerFragment(this);
+            tag = new RequestManagerFragment(context, this);
             fragmentManager.beginTransaction().add(tag, FRAGMENT_TAG).commitAllowingStateLoss();
         }
         return tag.getPageLifeManager();
     }
-
 }
+

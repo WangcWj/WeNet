@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
  * @date 2020/3/27
  */
 public interface WeNetResult<T> {
-
     /**
      * 表单提交的参数。
      *
@@ -21,6 +20,15 @@ public interface WeNetResult<T> {
      * @return 网络请求实体类。
      */
     WeNetRequest addParams(String key, String value);
+
+    /**
+     * 表单提交的参数。
+     *
+     * @param key  表单提交的key。
+     * @param value 表单提交的value。
+     * @return 网络请求实体类。
+     */
+    WeNetRequest addParams(String key, Object value);
 
     /**
      * 请求的参数通过RequestBody上传。
@@ -60,4 +68,17 @@ public interface WeNetResult<T> {
      */
     WeNetRequest bindLife(Dialog dialog);
 
+    /**
+     *
+     * @param show
+     * @return
+     */
+    WeNetRequest showProgress(boolean show);
+
+    /**
+     * 使用接口缓存。
+     * @param use true 缓存接口数据。
+     * @return
+     */
+    WeNetRequest isUseCache(boolean use);
 }

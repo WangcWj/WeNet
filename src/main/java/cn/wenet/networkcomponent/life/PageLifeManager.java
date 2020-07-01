@@ -1,16 +1,16 @@
 package cn.wenet.networkcomponent.life;
 
 
+import android.content.Context;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import cn.wenet.networkcomponent.base.NetBaseParam;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
 import cn.wenet.networkcomponent.utils.ThreadUtils;
 import io.reactivex.disposables.CompositeDisposable;
-import retrofit2.http.HTTP;
+
 
 
 /**
@@ -24,14 +24,28 @@ public class PageLifeManager implements WeNetLifecycleControl {
 
     private RequestLifeCircle mManagerRequest;
     private CompositeDisposable mDisposable;
+    private Context mContext;
     private final Set<ComponentLifeCircle> mLifeCircles = Collections.newSetFromMap(new WeakHashMap<ComponentLifeCircle, Boolean>());
 
     PageLifeManager(RequestLifeCircle managerRequest) {
         this.mManagerRequest = managerRequest;
     }
 
+    public void setContext(Context mContext) {
+        this.mContext = mContext;
+    }
+
+    /**
+     * 可能为null。
+     *
+     * @return Context。
+     */
+    public Context getContext() {
+        return mContext;
+    }
+
     private void addRequestParams(NetRequestImpl request) {
-        mManagerRequest.addRequestParams(request);
+        mManagerRequest.addRequest(request);
     }
 
     private void removeRequest(String url) {
@@ -87,9 +101,12 @@ public class PageLifeManager implements WeNetLifecycleControl {
             lifecycleListener.onDestroy();
         }
         mLifeCircles.clear();
+        mContext = null;
         mDisposable = null;
+        mManagerRequest = null;
         WeDebug.d("PageLifeManager pageDestroy");
     }
 
 
 }
+

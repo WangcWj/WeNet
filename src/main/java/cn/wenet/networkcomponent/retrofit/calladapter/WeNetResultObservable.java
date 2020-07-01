@@ -55,6 +55,12 @@ public class WeNetResultObservable<T> extends Observable<T> implements WeNetResu
     }
 
     @Override
+    public WeNetRequest addParams(String key, Object value) {
+        mNetRequest.addParams(key, value);
+        return mNetRequest;
+    }
+
+    @Override
     public WeNetRequest asBody() {
         mNetRequest.asBody();
         return mNetRequest;
@@ -81,6 +87,18 @@ public class WeNetResultObservable<T> extends Observable<T> implements WeNetResu
     @Override
     public WeNetRequest bindLife(Dialog dialog) {
         mNetRequest.bindLife(dialog);
+        return mNetRequest;
+    }
+
+    @Override
+    public WeNetRequest showProgress(boolean show) {
+        mNetRequest.showProgress(show);
+        return mNetRequest;
+    }
+
+    @Override
+    public WeNetRequest isUseCache(boolean use) {
+        mNetRequest.isUseCache(use);
         return mNetRequest;
     }
 

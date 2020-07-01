@@ -9,6 +9,7 @@ import java.io.File;
 import java.util.Map;
 
 import cn.wenet.networkcomponent.base.NetBaseParam;
+import cn.wenet.networkcomponent.life.WeNetLifeCircleManager;
 import cn.wenet.networkcomponent.okhttp.intercepter.BaseInterceptor;
 import io.reactivex.Observable;
 import okhttp3.HttpUrl;
@@ -80,6 +81,10 @@ public class WeNetWork {
      */
     public static <T> WeNetRequest request(Observable<T> observable) {
         return Control.getInstance().request(observable);
+    }
+
+    public static WeNetLifeCircleManager getLifeCircleManager(){
+        return Control.getInstance().getLifeCircleManager();
     }
 
     public static Map<String, Object> getBaseParams() {

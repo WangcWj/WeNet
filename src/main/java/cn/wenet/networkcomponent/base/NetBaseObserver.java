@@ -1,6 +1,7 @@
 package cn.wenet.networkcomponent.base;
 
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -11,6 +12,7 @@ import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.debug.exception.NetException;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
+import cn.wenet.networkcomponent.utils.ThreadUtils;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
@@ -50,9 +52,13 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
     @Override
     public void onError(Throwable e) {
-        NetException netException = new NetException(e);
-        netCallBack.onError(netException);
-        requestFinish();
+        if (ThreadUtils.isMainThread()) {
+            if (null != netCallBack) {
+                NetException netException = new NetException(e);
+                netCallBack.onError(netException);
+            }
+            requestFinish();
+        }
     }
 
     @Override
@@ -62,14 +68,22 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
     /**
      * 这个方法执行之前，mCurrentRequest中的Url还是null。
+     *
      * @param d
      */
     @Override
     public void onSubscribe(Disposable d) {
         mCurrentRequest.setCurrentDisposable(d);
         if (null != lifeCircleManager) {
+            Context context = lifeCircleManager.getContext();
+            if (null != context && mCurrentRequest.isShowProgress()) {
+                handlerProgress(context, true);
+            }
             lifeCircleManager.register(this);
             lifeCircleManager.requestStart(mCurrentRequest);
+        }
+        if (null != netCallBack) {
+            netCallBack.pageLifeCircle(d);
         }
     }
 
@@ -78,19 +92,15 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
         if (null == netCallBack) {
             return;
         }
+        NetException netException = null;
         try {
             if (t instanceof NetBaseResultBean) {
                 NetBaseResultBean resultBean = (NetBaseResultBean) t;
-                NetException netException = new NetException(resultBean.getCode(), resultBean.getStatus(), resultBean.getMsg());
+                netException = new NetException(resultBean.getCode(), resultBean.getMsg());
                 boolean success = netException.success();
                 if (success) {
                     Object data = resultBean.getData();
-                    if (null == data) {
-                        netException.setMessage("Data数据为null!");
-                        netCallBack.onError(netException);
-                    } else {
-                        netCallBack.onSuccess(data);
-                    }
+                    netCallBack.onSuccess(data);
                 } else {
                     netCallBack.onError(netException);
                 }
@@ -99,19 +109,25 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            if (null == netException) {
+                netException = new NetException(e);
+            }
+            netCallBack.onError(netException);
         } finally {
             requestFinish();
         }
     }
 
     @Override
-    public void onCreate() {
-        //do nothing
-    }
-
-    @Override
     public void onDestroy() {
         clearData();
+        handlerProgress(null, false);
+    }
+
+    private void handlerProgress(Context context, boolean show) {
+        if (null != netCallBack) {
+            netCallBack.showProgress(context, show);
+        }
     }
 
     private void clearData() {

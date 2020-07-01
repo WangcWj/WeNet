@@ -73,18 +73,19 @@ public class NetRequestImpl implements WeNetRequest {
 
     private String mUrl;
 
-    private String mBodyJson = "";
+    private String mBodyJson = "{}";
 
-    private boolean isBody = false;
+    private boolean isBody = true;
 
-    private boolean isForm = true;
+    private boolean isForm = false;
 
-    private boolean mUseCache = false;
+    private boolean mIsShowProgress = false;
+
+    private boolean mUserCache = false;
 
     public NetRequestImpl(Control netControl) {
         this.netControl = netControl;
         mParams = new HashMap<>();
-        mParams.putAll(netControl.mBaseParams);
     }
 
     @Override
@@ -124,7 +125,7 @@ public class NetRequestImpl implements WeNetRequest {
 
     @Override
     public void cacheMode(boolean useCache) {
-        this.mUseCache = useCache;
+
     }
 
     @Override
@@ -166,6 +167,12 @@ public class NetRequestImpl implements WeNetRequest {
     }
 
     @Override
+    public WeNetRequest addParams(String key, Object value) {
+        mParams.put(key, value);
+        return this;
+    }
+
+    @Override
     public NetRequestImpl addParams(Map<String, Object> params) {
         mParams.putAll(params);
         return this;
@@ -196,6 +203,18 @@ public class NetRequestImpl implements WeNetRequest {
     }
 
     @Override
+    public WeNetRequest showProgress(boolean show) {
+        mIsShowProgress = show;
+        return this;
+    }
+
+    @Override
+    public WeNetRequest isUseCache(boolean use) {
+        mUserCache = use;
+        return this;
+    }
+
+    @Override
     public <T> NetRequestImpl apiMethod(Observable<T> observable) {
         mObservable = observable;
         return this;
@@ -217,16 +236,20 @@ public class NetRequestImpl implements WeNetRequest {
         return mCurrentDisposable;
     }
 
+    public boolean isUseCache() {
+        return mUserCache;
+    }
+
+    public boolean isShowProgress() {
+        return mIsShowProgress;
+    }
+
     public void updateUrl(String url) {
-       mUrl = url;
+        mUrl = url;
     }
 
     public void setCurrentDisposable(Disposable mCurrentDisposable) {
         this.mCurrentDisposable = mCurrentDisposable;
-    }
-
-    public boolean isUseCache() {
-        return mUseCache;
     }
 
     public void setNetObservable(WeNetResultObservable netObservable) {
@@ -238,6 +261,9 @@ public class NetRequestImpl implements WeNetRequest {
     }
 
     public String getBodyJson() {
+        if(mParams.size() > 0){
+            mBodyJson = GsonUtils.objectToJson(mParams);
+        }
         return mBodyJson;
     }
 
@@ -249,7 +275,7 @@ public class NetRequestImpl implements WeNetRequest {
 
     private <T> void execute(Observable observable, WeNetworkCallBack<T> callback) {
         //要先执行
-        netControl.execute(this,mPageLifeManager, observable, callback);
+        netControl.execute(this, mPageLifeManager, observable, callback);
     }
 
 

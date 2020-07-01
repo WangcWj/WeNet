@@ -8,8 +8,6 @@ package cn.wenet.networkcomponent.life;
  */
 public interface ComponentLifeCircle {
 
-    void onCreate();
-
     void onDestroy();
 
 }
