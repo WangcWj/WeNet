@@ -35,6 +35,10 @@ public class PageLifeManager implements WeNetLifecycleControl {
         this.mContext = mContext;
     }
 
+    public boolean isCreateSuccess(){
+        return null != mManagerRequest;
+    }
+
     /**
      * 可能为null。
      *

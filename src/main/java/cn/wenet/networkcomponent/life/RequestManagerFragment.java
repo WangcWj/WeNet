@@ -12,6 +12,8 @@ import cn.wenet.networkcomponent.debug.WeDebug;
 
 /**
  * Created to : 一个Fragment，用来管理Activity的生命周期。
+ * <p>
+ * 要处理下 页面在onCreate()方法之后就崩溃，这时RequestManagerFragment还没添加到Activity中。
  *
  * @author cc.wang
  * @date 2020/4/7
@@ -19,6 +21,10 @@ import cn.wenet.networkcomponent.debug.WeDebug;
 public class RequestManagerFragment extends Fragment {
 
     private PageLifeManager pageLifeManager;
+
+    private WeNetLifeCircleManager mLifeCircleManager;
+
+    private String mLifeTag;
 
     /**
      * 崩溃重建的时候，可能会执行该方法。
@@ -29,9 +35,14 @@ public class RequestManagerFragment extends Fragment {
 
     public RequestManagerFragment(Context context, WeNetLifeCircleManager manager) {
         if (null != manager) {
+            mLifeCircleManager = manager;
             pageLifeManager = new PageLifeManager(manager);
             pageLifeManager.setContext(context);
         }
+    }
+
+    public void setLifeTag(String mLifeTag) {
+        this.mLifeTag = mLifeTag;
     }
 
     PageLifeManager getPageLifeManager() {
@@ -43,8 +54,13 @@ public class RequestManagerFragment extends Fragment {
         if (null != pageLifeManager) {
             pageLifeManager.pageDestroy();
         }
+        if (null != mLifeCircleManager) {
+            mLifeCircleManager.removeLifeCircleTag(mLifeTag);
+        }
         super.onDestroy();
-        WeDebug.d("RequestManagerFragment.onDestroy");
+        if (getActivity() != null) {
+            WeDebug.logD("RequestManagerFragment.onDestroy", getActivity().getClass().getSimpleName());
+        }
         pageLifeManager = null;
     }
 
@@ -54,6 +70,6 @@ public class RequestManagerFragment extends Fragment {
         if (null != pageLifeManager) {
             pageLifeManager.setContext(getContext());
         }
-        WeDebug.d("RequestManagerFragment.onCreate");
+        WeDebug.logD("RequestManagerFragment.onCreate");
     }
 }
