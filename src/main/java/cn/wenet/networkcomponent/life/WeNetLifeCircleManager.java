@@ -34,6 +34,7 @@ public class WeNetLifeCircleManager implements RequestLifeCircle {
 
     private Map<String, NetRequestImpl> mRequests = new HashMap<>();
 
+    private Map<String, RequestManagerFragment> mLifeManager = new HashMap<>();
 
     private final Object LOCK = new Object();
 
@@ -89,7 +90,7 @@ public class WeNetLifeCircleManager implements RequestLifeCircle {
             throw new IllegalArgumentException("You cannot start a load on a null Fragment");
         } else {
             FragmentManager childFragmentManager = fragment.getChildFragmentManager();
-            return supportFragmentGet(fragment.getContext(), childFragmentManager);
+            return supportFragmentGet(fragment.getContext(), childFragmentManager,fragment.getClass().getSimpleName());
         }
     }
 
@@ -127,20 +128,29 @@ public class WeNetLifeCircleManager implements RequestLifeCircle {
     }
 
     private PageLifeManager bindActivity(FragmentActivity fragmentActivity) {
-        WeDebug.logD("-----------bindActivity-------" + fragmentActivity.isDestroyed());
-        if (fragmentActivity.isDestroyed()) {
-//            throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
-            return null;
+        WeDebug.logD("-----------bindActivity-------" + fragmentActivity.getPackageName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            if (fragmentActivity.isDestroyed()) {
+                //            throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
+                return null;
+            }
         }
         FragmentManager supportFragmentManager = fragmentActivity.getSupportFragmentManager();
-        return supportFragmentGet(fragmentActivity, supportFragmentManager);
+        return supportFragmentGet(fragmentActivity, supportFragmentManager, fragmentActivity.getClass().getSimpleName());
     }
 
-    private PageLifeManager supportFragmentGet(Context context, FragmentManager fragmentManager) {
+    private PageLifeManager supportFragmentGet(Context context, FragmentManager fragmentManager, String stringTag) {
         RequestManagerFragment tag = (RequestManagerFragment) fragmentManager.findFragmentByTag(FRAGMENT_TAG);
+        WeDebug.logD("-----------supportFragmentGet-------" + tag);
         if (null == tag) {
-            tag = new RequestManagerFragment(context, this);
-            fragmentManager.beginTransaction().add(tag, FRAGMENT_TAG).commitAllowingStateLoss();
+            tag = mLifeManager.get(stringTag);
+            if (null == tag) {
+                tag = new RequestManagerFragment(context, this);
+                fragmentManager.beginTransaction().add(tag, FRAGMENT_TAG).commitAllowingStateLoss();
+                mLifeManager.put(stringTag, tag);
+            } else {
+                return tag.getPageLifeManager();
+            }
         }
         return tag.getPageLifeManager();
     }
