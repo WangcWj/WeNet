@@ -12,7 +12,7 @@ import java.util.List;
  * @author cc.wang
  * @date 2020/4/10
  */
-public class ThreadUtils {
+public class WeNetThreadUtils {
     public static boolean isMainThread() {
         return Looper.getMainLooper().getThread() == Thread.currentThread();
     }

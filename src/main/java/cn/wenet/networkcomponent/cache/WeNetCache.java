@@ -7,6 +7,9 @@ import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.debug.exception.NetException;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
 import io.reactivex.disposables.Disposable;
+import okhttp3.HttpUrl;
+import okhttp3.Response;
+import okio.ByteString;
 
 /**
  * Created to :
@@ -48,6 +51,16 @@ public class WeNetCache implements WeNetworkCallBack {
     @Override
     public void showProgress(Context context, boolean canShow) {
 
+    }
+
+
+    Response get(String mUrl){
+
+    }
+
+
+    public static String key(HttpUrl url) {
+        return ByteString.encodeUtf8(url.toString()).md5().hex();
     }
 
 }

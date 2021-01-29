@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
-import cn.wenet.networkcomponent.utils.ThreadUtils;
+import cn.wenet.networkcomponent.utils.WeNetThreadUtils;
 import io.reactivex.disposables.CompositeDisposable;
 
 
@@ -101,7 +101,7 @@ public class PageLifeManager implements WeNetLifecycleControl {
             mDisposable.dispose();
         }
         //NetBaseObserver的生命周期的控制。
-        for (ComponentLifeCircle lifecycleListener : ThreadUtils.getSnapshot(mLifeCircles)) {
+        for (ComponentLifeCircle lifecycleListener : WeNetThreadUtils.getSnapshot(mLifeCircles)) {
             lifecycleListener.onDestroy();
         }
         mLifeCircles.clear();

@@ -14,6 +14,7 @@ import retrofit2.Retrofit;
 
 /**
  * 重写GsonConverterFactory，对接口的请求结果做出预处理。
+ *
  * @author cc.wang
  */
 public class WeNetGsonConverterFactory extends Converter.Factory {
@@ -37,9 +38,8 @@ public class WeNetGsonConverterFactory extends Converter.Factory {
 
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
-
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-        return new WeNetGsonResponseBodyConverter<>(gson, adapter);
+        return new WeNetGsonResponseBodyConverter<>(gson, type, adapter);
     }
 
     @Override

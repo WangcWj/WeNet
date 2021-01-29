@@ -15,7 +15,7 @@ import cn.wenet.networkcomponent.core.WeNetRequest;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.retrofit.calladapter.WeNetResultObservable;
-import cn.wenet.networkcomponent.utils.GsonUtils;
+import cn.wenet.networkcomponent.utils.WeNetGsonUtils;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
@@ -150,7 +150,7 @@ public class NetRequestImpl implements WeNetRequest {
     @Override
     public NetRequestImpl bodyToJson(Object o) {
         if (null != o) {
-            String toJson = GsonUtils.objectToJson(o);
+            String toJson = WeNetGsonUtils.objectToJson(o);
             if (!TextUtils.isEmpty(toJson)) {
                 bodyToJson(toJson);
             } else {
@@ -262,7 +262,7 @@ public class NetRequestImpl implements WeNetRequest {
 
     public String getBodyJson() {
         if(mParams.size() > 0){
-            mBodyJson = GsonUtils.objectToJson(mParams);
+            mBodyJson = WeNetGsonUtils.objectToJson(mParams);
         }
         return mBodyJson;
     }

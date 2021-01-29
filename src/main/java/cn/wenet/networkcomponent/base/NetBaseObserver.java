@@ -2,17 +2,15 @@ package cn.wenet.networkcomponent.base;
 
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import cn.wenet.networkcomponent.debug.WeDebug;
 import cn.wenet.networkcomponent.life.ComponentLifeCircle;
 import cn.wenet.networkcomponent.life.PageLifeManager;
 import cn.wenet.networkcomponent.debug.exception.NetException;
 import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
-import cn.wenet.networkcomponent.utils.ThreadUtils;
+import cn.wenet.networkcomponent.utils.WeNetThreadUtils;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
@@ -52,7 +50,7 @@ public class NetBaseObserver<T> implements Observer<T>, ComponentLifeCircle {
 
     @Override
     public void onError(Throwable e) {
-        if (ThreadUtils.isMainThread()) {
+        if (WeNetThreadUtils.isMainThread()) {
             if (null != netCallBack) {
                 NetException netException = new NetException(e);
                 netCallBack.onError(netException);

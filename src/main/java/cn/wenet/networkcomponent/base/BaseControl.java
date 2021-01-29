@@ -19,7 +19,7 @@ import cn.wenet.networkcomponent.core.WeNetworkCallBack;
 import cn.wenet.networkcomponent.request.NetRequestImpl;
 import cn.wenet.networkcomponent.retrofit.NetRetrofit;
 import cn.wenet.networkcomponent.retrofit.retrywhen.NetRetryWhen;
-import cn.wenet.networkcomponent.utils.ThreadUtils;
+import cn.wenet.networkcomponent.utils.WeNetThreadUtils;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -154,7 +154,7 @@ public class BaseControl {
 
 
     public void init(Context context) {
-        if (!ThreadUtils.isMainThread()) {
+        if (!WeNetThreadUtils.isMainThread()) {
             WeDebug.e("请在主线程中初始化该框架！");
             return;
         }

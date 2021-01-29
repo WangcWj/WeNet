@@ -1,15 +1,8 @@
 package cn.wenet.networkcomponent.utils;
 
-import android.text.TextUtils;
-
-import com.google.gson.stream.JsonWriter;
-
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.nio.charset.Charset;
-
 import cn.wenet.networkcomponent.debug.WeDebug;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
